@@ -1,6 +1,6 @@
 // Matching utils (placeholder)
 //
-// TODO: Implement the logic that compares a
+// TODO: In a future prompt, implement the logic that compares a
 // recipe's required ingredients against the user's pantry items to
 // determine "can cook", "almost possible", and "missing ingredients"
 // (plus the substitution lookup).

@@ -1,5 +1,5 @@
 // RecipeDetails page
-// TODO: Implement recipe details + substitutions logic.
+// TODO: Implement recipe details + substitutions logic in a future prompt.
 function RecipeDetails() {
   return (
     <div className="page">

@@ -1,5 +1,5 @@
 // Signup page
-// TODO: Implement authentication logic.
+// TODO: Implement authentication logic in a future prompt.
 function Signup() {
   return (
     <div className="page">

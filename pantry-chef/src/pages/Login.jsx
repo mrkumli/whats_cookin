@@ -1,5 +1,5 @@
 // Login page
-// TODO: Implement authentication logic.
+// TODO: Implement authentication logic in a future prompt.
 function Login() {
   return (
     <div className="page">

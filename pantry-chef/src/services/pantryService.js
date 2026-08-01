@@ -1,6 +1,6 @@
 // Pantry service (placeholder)
 //
-// TODO: Implement these using Firestore.
+// TODO: Implement these using Firestore in a future prompt.
 // Each function will read/write to a user-scoped pantry collection,
 // e.g. users/{uid}/pantryItems
 

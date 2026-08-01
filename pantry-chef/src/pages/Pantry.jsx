@@ -1,5 +1,5 @@
 // Pantry page
-// TODO: Implement pantry CRUD logic.
+// TODO: Implement pantry CRUD logic in a future prompt.
 function Pantry() {
   return (
     <div className="page">

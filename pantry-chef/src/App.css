@@ -1,27 +1,169 @@
-.app {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 16px;
-  font-family: sans-serif;
-}
-
-.navigation {
+/* ---- App shell ---- */
+.layout {
+  min-height: 100vh;
   display: flex;
-  gap: 16px;
-  padding-bottom: 16px;
-  margin-bottom: 16px;
-  border-bottom: 1px solid #ddd;
+  flex-direction: column;
 }
 
-.navigation a {
-  text-decoration: none;
-  color: #333;
-}
-
-.navigation a:hover {
-  text-decoration: underline;
+/* ---- Page container ----
+   Every page's content sits inside this, so spacing and max-width
+   stay consistent across the whole app. */
+.page-container {
+  flex: 1;
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-md);
 }
 
 .page {
-  padding: 16px 0;
+  padding: var(--space-sm) 0;
+}
+
+.page h1 {
+  margin-top: 0;
+  font-size: 1.75rem;
+}
+
+.page p {
+  color: var(--color-text-muted);
+}
+
+/* ---- Top navigation bar ---- */
+.navbar {
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.navbar__inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-sm) var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.navbar__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  text-decoration: none;
+  color: var(--color-text);
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+
+.navbar__logo-mark {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.navbar__links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.navbar__links a {
+  text-decoration: none;
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.navbar__links a:hover {
+  color: var(--color-primary-dark);
+}
+
+.navbar__cta {
+  background-color: var(--color-primary);
+  color: #fff !important;
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius);
+}
+
+.navbar__cta:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* Mobile menu toggle button: hidden on desktop */
+.navbar__toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.navbar__toggle-bar {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background-color: var(--color-text);
+  border-radius: 1px;
+}
+
+/* ---- Footer ---- */
+.footer {
+  border-top: 1px solid var(--color-border);
+  margin-top: var(--space-xl);
+}
+
+.footer__inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  font-size: 0.9rem;
+}
+
+.footer__muted {
+  color: var(--color-text-muted);
+}
+
+/* ---- Responsive layout ---- */
+@media (max-width: 640px) {
+  .navbar__toggle {
+    display: flex;
+  }
+
+  .navbar__links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    display: none;
+  }
+
+  .navbar__links--open {
+    display: flex;
+  }
+
+  .navbar__cta {
+    display: inline-block;
+  }
+
+  .footer__inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

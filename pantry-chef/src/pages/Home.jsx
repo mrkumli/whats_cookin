@@ -1,5 +1,5 @@
 // Home page
-// TODO: Implement recipe recommendations.
+// TODO: Implement recipe recommendations in a future prompt.
 function Home() {
   return (
     <div className="page">
