@@ -1,16 +1,40 @@
-# React + Vite
+# What's Cookin' — Pantry + Recipe Recommendation App
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+CS160 (HCI) course project. An MVP web app for tracking pantry
+ingredients and recommending recipes based on what you already have.
 
-Currently, two official plugins are available:
+## Status
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+This is the initial project skeleton. Routing and page structure are
+in place; no features (auth, pantry, recipes) are implemented yet.
+Each feature will be built incrementally in later commits.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React (Vite)
+- React Router
+- Firebase Authentication + Firestore
+- Deployed on Vercel
 
-## Expanding the Oxlint configuration
+## Project Structure
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+```
+src/
+  pages/       Route-level components (Login, Signup, Home, Pantry, RecipeDetails, NotFound)
+  components/  Reusable UI components (e.g. Navigation)
+  services/    Firebase, auth, and pantry data-access functions
+  contexts/    React context providers (e.g. AuthContext)
+  hooks/       Custom hooks (e.g. usePantry)
+  utils/       Pure helper functions (e.g. ingredient matching logic)
+```
+
+## Getting Started
+
+```bash
+npm install
+npm run dev
+```
+
+Copy `.env.example` to `.env` and fill in Firebase config once the
+Firebase project is created (not needed yet — auth/Firestore aren't
+wired up in this skeleton).
