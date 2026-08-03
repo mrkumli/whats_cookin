@@ -12,6 +12,8 @@
 .home-hero h1 {
   margin: 0 0 var(--space-xs);
   font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text);
 }
 
 .home-hero__subtitle {
@@ -26,10 +28,10 @@
 
 .search-bar__input {
   width: 100%;
-  padding: 0.65rem 1rem;
+  padding: 0.65rem 1.1rem;
   font-size: 1rem;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-pill);
   background-color: var(--color-surface);
   color: var(--color-text);
 }
@@ -42,6 +44,8 @@
 .home-section h2 {
   margin: 0 0 var(--space-md);
   font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-text);
 }
 
 .home-section__empty {

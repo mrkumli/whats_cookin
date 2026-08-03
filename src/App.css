@@ -82,8 +82,8 @@
 .navbar__cta {
   background-color: var(--color-primary);
   color: #fff !important;
-  padding: 0.4rem 0.9rem;
-  border-radius: var(--radius);
+  padding: 0.45rem 1.1rem;
+  border-radius: var(--radius-pill);
 }
 
 .navbar__cta:hover {

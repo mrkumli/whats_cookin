@@ -9,7 +9,7 @@
 
 .recipe-card-skeleton__image {
   aspect-ratio: 4 / 3;
-  background-color: #ece7da;
+  background-color: #e4e4e4;
   animation: skeleton-pulse 1.2s ease-in-out infinite;
 }
 
@@ -23,7 +23,7 @@
 .recipe-card-skeleton__line {
   height: 0.85rem;
   border-radius: 4px;
-  background-color: #ece7da;
+  background-color: #e4e4e4;
   animation: skeleton-pulse 1.2s ease-in-out infinite;
 }
 

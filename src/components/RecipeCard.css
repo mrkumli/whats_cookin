@@ -23,7 +23,7 @@
 .recipe-card__image {
   position: relative;
   aspect-ratio: 4 / 3;
-  background-color: #f0ece1;
+  background-color: var(--color-surface-muted);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -45,7 +45,7 @@
   font-size: 0.75rem;
   font-weight: 600;
   padding: 0.25rem 0.6rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .recipe-card__body {
@@ -54,11 +54,14 @@
   flex-direction: column;
   gap: 0.35rem;
   flex: 1;
+  background-color: var(--color-surface-muted);
 }
 
 .recipe-card__title {
   margin: 0;
   font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text);
 }
 
 .recipe-card__meta {

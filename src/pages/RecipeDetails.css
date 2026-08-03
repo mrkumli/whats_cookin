@@ -17,7 +17,7 @@
   border-radius: var(--radius);
   overflow: hidden;
   aspect-ratio: 16 / 9;
-  background-color: #f0ece1;
+  background-color: var(--color-surface-muted);
 }
 
 .recipe-details__image img {
@@ -29,6 +29,8 @@
 
 .recipe-details h1 {
   margin: 0;
+  font-weight: 700;
+  color: var(--color-text);
 }
 
 .recipe-details__meta {
@@ -39,7 +41,9 @@
 
 .recipe-details__section h2 {
   font-size: 1.15rem;
+  font-weight: 700;
   margin-bottom: var(--space-sm);
+  color: var(--color-text);
 }
 
 /* ---- Ingredient list ---- */
@@ -63,13 +67,13 @@
 }
 
 .ingredient-list__item--available {
-  background-color: #eef4ec;
-  border-color: #cfe0c9;
+  background-color: #e7f0ec;
+  border-color: #bcd6c8;
 }
 
 .ingredient-list__item--missing {
-  background-color: #fbf3e8;
-  border-color: #ecd9b8;
+  background-color: #f8eceb;
+  border-color: #e3bcb9;
 }
 
 .ingredient-list__info {
@@ -98,8 +102,8 @@
   background-color: var(--color-accent);
   color: #fff;
   border: none;
-  border-radius: var(--radius);
-  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-pill);
+  padding: 0.4rem 0.9rem;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;

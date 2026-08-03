@@ -1,13 +1,14 @@
 /* Design tokens */
 :root {
-  --color-bg: #faf7f2;
+  --color-bg: #ffffff;
   --color-surface: #ffffff;
-  --color-text: #2b2b26;
-  --color-text-muted: #6f6a5e;
-  --color-border: #e7e1d4;
-  --color-primary: #4f7a5a;
-  --color-primary-dark: #3d5f46;
-  --color-accent: #e0a458;
+  --color-surface-muted: #f4f4f4;
+  --color-text: #141414;
+  --color-text-muted: #6b6b6b;
+  --color-border: #dcdcdc;
+  --color-primary: #0b4d3a;
+  --color-primary-dark: #082e23;
+  --color-accent: #a63232;
 
   --space-xs: 0.5rem;
   --space-sm: 0.75rem;
@@ -15,7 +16,8 @@
   --space-lg: 2rem;
   --space-xl: 3rem;
 
-  --radius: 10px;
+  --radius: 14px;
+  --radius-pill: 999px;
   --max-width: 960px;
 
   font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
