@@ -109,6 +109,15 @@
   opacity: 0.9;
 }
 
+.ingredient-list__sub-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.recipe-details__loading {
+  color: var(--color-text-muted);
+}
+
 /* ---- Instructions ---- */
 .instruction-list {
   display: flex;
@@ -137,4 +146,20 @@
 .substitute-options__choice:hover {
   border-color: var(--color-primary);
   color: var(--color-primary-dark);
+}
+
+.substitute-options__choice:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .ingredient-list__item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ingredient-list__sub-button {
+    align-self: flex-end;
+  }
 }

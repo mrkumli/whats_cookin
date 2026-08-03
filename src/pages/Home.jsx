@@ -1,13 +1,15 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
 import RecipeCard from "../components/RecipeCard";
+import RecipeCardSkeleton from "../components/RecipeCardSkeleton";
+import EmptyState from "../components/EmptyState";
 import { recipes } from "../data/recipes";
-import {
-  isRecipeCookable,
-  countMissingIngredients,
-  mockPantry,
-} from "../utils/matching";
+import { isRecipeCookable, countMissingIngredients } from "../utils/matching";
+import { usePantry } from "../hooks/usePantry";
 import "./Home.css";
+
+const SKELETON_COUNT = 3;
 
 // Checks whether a recipe matches the search term, by title or by
 // any of its ingredient names.
@@ -23,6 +25,7 @@ function matchesSearch(recipe, term) {
 function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const normalizedSearch = searchTerm.trim().toLowerCase();
+  const { items: pantryItems, loading: pantryLoading } = usePantry();
 
   const filteredRecipes = useMemo(() => {
     if (!normalizedSearch) {
@@ -32,24 +35,26 @@ function Home() {
   }, [normalizedSearch]);
 
   const cookableRecipes = useMemo(
-    () => filteredRecipes.filter((recipe) => isRecipeCookable(recipe, mockPantry)),
-    [filteredRecipes]
+    () =>
+      filteredRecipes.filter((recipe) => isRecipeCookable(recipe, pantryItems)),
+    [filteredRecipes, pantryItems]
   );
 
   const missingIngredientRecipes = useMemo(
     () =>
       filteredRecipes
-        .filter((recipe) => !isRecipeCookable(recipe, mockPantry))
+        .filter((recipe) => !isRecipeCookable(recipe, pantryItems))
         .sort(
           (a, b) =>
-            countMissingIngredients(a, mockPantry) -
-            countMissingIngredients(b, mockPantry)
+            countMissingIngredients(a, pantryItems) -
+            countMissingIngredients(b, pantryItems)
         ),
-    [filteredRecipes]
+    [filteredRecipes, pantryItems]
   );
 
   const hasNoRecipesAtAll = recipes.length === 0;
   const hasNoSearchResults = !hasNoRecipesAtAll && filteredRecipes.length === 0;
+  const isPantryEmpty = !pantryLoading && pantryItems.length === 0;
 
   return (
     <div className="home-page">
@@ -61,26 +66,39 @@ function Home() {
         <SearchBar value={searchTerm} onChange={setSearchTerm} />
       </section>
 
+      {isPantryEmpty && (
+        <EmptyState
+          title="Your pantry is empty"
+          message="Add a few ingredients to your pantry to see which recipes you can make."
+          action={<Link to="/pantry">Go to Pantry →</Link>}
+        />
+      )}
+
       {hasNoRecipesAtAll && (
-        <div className="home-empty-state">
-          <p>No recipes are available right now. Check back soon.</p>
-        </div>
+        <EmptyState
+          title="No recipes available"
+          message="Check back soon -- new recipes are on the way."
+        />
       )}
 
       {hasNoSearchResults && (
-        <div className="home-empty-state">
-          <p>
-            No recipes match <strong>"{searchTerm}"</strong>. Try a
-            different recipe name or ingredient.
-          </p>
-        </div>
+        <EmptyState
+          title={`No recipes match "${searchTerm}"`}
+          message="Try a different recipe name or ingredient."
+        />
       )}
 
       {!hasNoRecipesAtAll && !hasNoSearchResults && (
         <>
           <section className="home-section">
             <h2>Recipes You Can Make</h2>
-            {cookableRecipes.length === 0 ? (
+            {pantryLoading ? (
+              <div className="recipe-grid">
+                {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
+                  <RecipeCardSkeleton key={index} />
+                ))}
+              </div>
+            ) : cookableRecipes.length === 0 ? (
               <p className="home-section__empty">
                 Nothing fully cookable yet with what's on hand.
               </p>
@@ -95,7 +113,13 @@ function Home() {
 
           <section className="home-section">
             <h2>Recipes Missing Ingredients</h2>
-            {missingIngredientRecipes.length === 0 ? (
+            {pantryLoading ? (
+              <div className="recipe-grid">
+                {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
+                  <RecipeCardSkeleton key={index} />
+                ))}
+              </div>
+            ) : missingIngredientRecipes.length === 0 ? (
               <p className="home-section__empty">
                 Everything here is ready to cook!
               </p>
@@ -105,7 +129,7 @@ function Home() {
                   <RecipeCard
                     key={recipe.id}
                     recipe={recipe}
-                    missingCount={countMissingIngredients(recipe, mockPantry)}
+                    missingCount={countMissingIngredients(recipe, pantryItems)}
                   />
                 ))}
               </div>

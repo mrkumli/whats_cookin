@@ -1,10 +1,21 @@
+import { useEffect } from "react";
 import "./Modal.css";
 
 // Modal
 // Minimal, reusable overlay dialog. Renders `children` inside a
-// centered panel with a title and close button. No portals or focus
-// trapping yet -- kept simple, can be hardened later if needed.
+// centered panel with a title and close button. Closes on backdrop
+// click, the × button, or Escape.
 function Modal({ title, onClose, children }) {
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div

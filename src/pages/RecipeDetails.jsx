@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Modal from "../components/Modal";
+import EmptyState from "../components/EmptyState";
 import { recipes } from "../data/recipes";
-import { isIngredientInPantry, mockPantry } from "../utils/matching";
+import { isIngredientInPantry } from "../utils/matching";
 import { getAvailableSubstitutes } from "../utils/substitution";
+import { usePantry } from "../hooks/usePantry";
 import "./RecipeDetails.css";
 
 // Builds the initial "displayed ingredients" list for a recipe: the
@@ -21,6 +23,7 @@ function buildDisplayedIngredients(recipe) {
 function RecipeDetails() {
   const { recipeId } = useParams();
   const recipe = recipes.find((item) => item.id === recipeId);
+  const { items: pantryItems, loading: pantryLoading } = usePantry();
 
   const [displayedIngredients, setDisplayedIngredients] = useState(() =>
     recipe ? buildDisplayedIngredients(recipe) : []
@@ -37,11 +40,11 @@ function RecipeDetails() {
   if (!recipe) {
     return (
       <div className="page">
-        <h1>Recipe not found</h1>
-        <p>We couldn't find that recipe.</p>
-        <Link to="/" className="recipe-details__back">
-          ← Back to Home
-        </Link>
+        <EmptyState
+          title="Recipe not found"
+          message="We couldn't find that recipe."
+          action={<Link to="/">← Back to Home</Link>}
+        />
       </div>
     );
   }
@@ -74,7 +77,7 @@ function RecipeDetails() {
       ? displayedIngredients[activeIngredientIndex]
       : null;
   const activeSubstitutes = activeIngredient
-    ? getAvailableSubstitutes(activeIngredient.name, mockPantry)
+    ? getAvailableSubstitutes(activeIngredient.name, pantryItems)
     : [];
 
   return (
@@ -99,45 +102,53 @@ function RecipeDetails() {
 
       <section className="recipe-details__section">
         <h2>Ingredients</h2>
-        <ul className="ingredient-list">
-          {displayedIngredients.map((ingredient, index) => {
-            const available = isIngredientInPantry(ingredient.name, mockPantry);
-            return (
-              <li
-                key={`${ingredient.name}-${index}`}
-                className={
-                  available
-                    ? "ingredient-list__item ingredient-list__item--available"
-                    : "ingredient-list__item ingredient-list__item--missing"
-                }
-              >
-                <div className="ingredient-list__info">
-                  <span className="ingredient-list__name">
-                    {ingredient.name}
-                  </span>
-                  <span className="ingredient-list__qty">
-                    {ingredient.quantity}
-                  </span>
-                  {ingredient.substitutedFrom && (
-                    <span className="ingredient-list__sub-note">
-                      Substituted for {ingredient.substitutedFrom}
+        {pantryLoading ? (
+          <p className="recipe-details__loading">Checking your pantry...</p>
+        ) : (
+          <ul className="ingredient-list">
+            {displayedIngredients.map((ingredient, index) => {
+              const available = isIngredientInPantry(
+                ingredient.name,
+                pantryItems
+              );
+              return (
+                <li
+                  key={`${ingredient.name}-${index}`}
+                  className={
+                    available
+                      ? "ingredient-list__item ingredient-list__item--available"
+                      : "ingredient-list__item ingredient-list__item--missing"
+                  }
+                >
+                  <div className="ingredient-list__info">
+                    <span className="ingredient-list__name">
+                      {ingredient.name}
                     </span>
-                  )}
-                </div>
+                    <span className="ingredient-list__qty">
+                      {ingredient.quantity}
+                    </span>
+                    {ingredient.substitutedFrom && (
+                      <span className="ingredient-list__sub-note">
+                        Substituted for {ingredient.substitutedFrom}
+                      </span>
+                    )}
+                  </div>
 
-                {!available && (
-                  <button
-                    type="button"
-                    className="ingredient-list__sub-button"
-                    onClick={() => openSubstituteModal(index)}
-                  >
-                    Substitute
-                  </button>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+                  {!available && (
+                    <button
+                      type="button"
+                      className="ingredient-list__sub-button"
+                      onClick={() => openSubstituteModal(index)}
+                      aria-label={`Find a substitute for ${ingredient.name}`}
+                    >
+                      Substitute
+                    </button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
 
       <section className="recipe-details__section">

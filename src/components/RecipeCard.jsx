@@ -9,9 +9,16 @@ import "./RecipeCard.css";
 // the route already exists).
 function RecipeCard({ recipe, missingCount }) {
   const isReadyToCook = missingCount === 0;
+  const statusLabel = isReadyToCook
+    ? "Ready to cook"
+    : `Missing ${missingCount} ${missingCount === 1 ? "ingredient" : "ingredients"}`;
 
   return (
-    <Link to={`/recipes/${recipe.id}`} className="recipe-card">
+    <Link
+      to={`/recipes/${recipe.id}`}
+      className="recipe-card"
+      aria-label={`${recipe.title} — ${recipe.cookTime} min, ${recipe.difficulty}, ${statusLabel}`}
+    >
       <div className="recipe-card__image">
         <img src={recipe.image} alt="" />
         {isReadyToCook && (

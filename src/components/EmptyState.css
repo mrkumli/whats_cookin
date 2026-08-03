@@ -1,0 +1,24 @@
+.empty-state {
+  text-align: center;
+  padding: var(--space-xl) var(--space-md);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+}
+
+.empty-state__title {
+  margin: 0 0 var(--space-xs);
+  font-weight: 600;
+}
+
+.empty-state__message {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.empty-state__action {
+  margin-top: var(--space-sm);
+}
+
+.empty-state__action a {
+  font-weight: 600;
+}

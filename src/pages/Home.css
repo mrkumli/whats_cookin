@@ -54,15 +54,15 @@
   gap: var(--space-md);
 }
 
-.home-empty-state {
-  text-align: center;
-  padding: var(--space-xl) var(--space-md);
-  color: var(--color-text-muted);
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius);
-}
-
 @media (max-width: 640px) {
+  .home-hero {
+    padding: var(--space-md) 0 var(--space-xs);
+  }
+
+  .home-hero h1 {
+    font-size: 1.6rem;
+  }
+
   .recipe-grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   }
