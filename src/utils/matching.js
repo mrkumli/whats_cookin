@@ -40,6 +40,13 @@ function pantryHasIngredient(ingredientName, pantryItems) {
   return pantryItems.some((item) => normalizeName(item.name) === target);
 }
 
+// Exported single-ingredient version of the check above, for UI that
+// needs to highlight individual ingredients (e.g. Recipe Details)
+// rather than whole recipes.
+export function isIngredientInPantry(ingredientName, pantryItems = mockPantry) {
+  return pantryHasIngredient(ingredientName, pantryItems);
+}
+
 // Returns the list of ingredient names (strings) from a recipe that
 // are NOT currently in the pantry.
 export function getMissingIngredients(recipe, pantryItems = mockPantry) {

@@ -1,0 +1,140 @@
+.recipe-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.recipe-details__back {
+  align-self: flex-start;
+  text-decoration: none;
+  font-weight: 500;
+  color: var(--color-primary-dark);
+}
+
+.recipe-details__image {
+  border-radius: var(--radius);
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background-color: #f0ece1;
+}
+
+.recipe-details__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.recipe-details h1 {
+  margin: 0;
+}
+
+.recipe-details__meta {
+  display: flex;
+  gap: var(--space-xs);
+  color: var(--color-text-muted);
+}
+
+.recipe-details__section h2 {
+  font-size: 1.15rem;
+  margin-bottom: var(--space-sm);
+}
+
+/* ---- Ingredient list ---- */
+.ingredient-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.ingredient-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+}
+
+.ingredient-list__item--available {
+  background-color: #eef4ec;
+  border-color: #cfe0c9;
+}
+
+.ingredient-list__item--missing {
+  background-color: #fbf3e8;
+  border-color: #ecd9b8;
+}
+
+.ingredient-list__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.ingredient-list__name {
+  font-weight: 600;
+}
+
+.ingredient-list__qty {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.ingredient-list__sub-note {
+  font-size: 0.8rem;
+  color: var(--color-primary-dark);
+  font-style: italic;
+}
+
+.ingredient-list__sub-button {
+  flex-shrink: 0;
+  background-color: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ingredient-list__sub-button:hover {
+  opacity: 0.9;
+}
+
+/* ---- Instructions ---- */
+.instruction-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding-left: 1.25rem;
+}
+
+/* ---- Substitute modal contents ---- */
+.substitute-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.substitute-options__choice {
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.substitute-options__choice:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+}
