@@ -21,7 +21,7 @@ export const recipes = [
   {
     id: "recipe-001",
     title: "Classic Scrambled Eggs",
-    image: "/placeholders/recipe.png",
+    image: "/placeholders/recipe.svg",
     cookTime: 10,
     difficulty: "Easy",
     category: "Breakfast",
@@ -41,7 +41,7 @@ export const recipes = [
   {
     id: "recipe-002",
     title: "Simple Tomato Pasta",
-    image: "/placeholders/recipe.png",
+    image: "/placeholders/recipe.svg",
     cookTime: 25,
     difficulty: "Easy",
     category: "Dinner",
@@ -63,7 +63,7 @@ export const recipes = [
   {
     id: "recipe-003",
     title: "Greek Yogurt Chicken Marinade",
-    image: "/placeholders/recipe.png",
+    image: "/placeholders/recipe.svg",
     cookTime: 35,
     difficulty: "Medium",
     category: "Dinner",
@@ -85,7 +85,7 @@ export const recipes = [
   {
     id: "recipe-004",
     title: "Veggie Stir Fry",
-    image: "/placeholders/recipe.png",
+    image: "/placeholders/recipe.svg",
     cookTime: 20,
     difficulty: "Easy",
     category: "Dinner",
@@ -107,7 +107,7 @@ export const recipes = [
   {
     id: "recipe-005",
     title: "Banana Pancakes",
-    image: "/placeholders/recipe.png",
+    image: "/placeholders/recipe.svg",
     cookTime: 20,
     difficulty: "Easy",
     category: "Breakfast",
@@ -129,7 +129,7 @@ export const recipes = [
   {
     id: "recipe-006",
     title: "Lentil Soup",
-    image: "/placeholders/recipe.png",
+    image: "/placeholders/recipe.svg",
     cookTime: 40,
     difficulty: "Medium",
     category: "Lunch",
@@ -151,7 +151,7 @@ export const recipes = [
   {
     id: "recipe-007",
     title: "Grilled Cheese Sandwich",
-    image: "/placeholders/recipe.png",
+    image: "/placeholders/recipe.svg",
     cookTime: 10,
     difficulty: "Easy",
     category: "Lunch",
@@ -170,7 +170,7 @@ export const recipes = [
   {
     id: "recipe-008",
     title: "Beef Tacos",
-    image: "/placeholders/recipe.png",
+    image: "/placeholders/recipe.svg",
     cookTime: 30,
     difficulty: "Medium",
     category: "Dinner",
@@ -192,7 +192,7 @@ export const recipes = [
   {
     id: "recipe-009",
     title: "Overnight Oats",
-    image: "/placeholders/recipe.png",
+    image: "/placeholders/recipe.svg",
     cookTime: 5,
     difficulty: "Easy",
     category: "Breakfast",
@@ -212,7 +212,7 @@ export const recipes = [
   {
     id: "recipe-010",
     title: "Caprese Salad",
-    image: "/placeholders/recipe.png",
+    image: "/placeholders/recipe.svg",
     cookTime: 10,
     difficulty: "Easy",
     category: "Snack",
@@ -233,7 +233,7 @@ export const recipes = [
   {
     id: "recipe-011",
     title: "Chocolate Mug Cake",
-    image: "/placeholders/recipe.png",
+    image: "/placeholders/recipe.svg",
     cookTime: 5,
     difficulty: "Easy",
     category: "Dessert",
@@ -255,7 +255,7 @@ export const recipes = [
   {
     id: "recipe-012",
     title: "Chickpea Curry",
-    image: "/placeholders/recipe.png",
+    image: "/placeholders/recipe.svg",
     cookTime: 35,
     difficulty: "Medium",
     category: "Dinner",
@@ -277,7 +277,7 @@ export const recipes = [
   {
     id: "recipe-013",
     title: "Fruit and Yogurt Parfait",
-    image: "/placeholders/recipe.png",
+    image: "/placeholders/recipe.svg",
     cookTime: 5,
     difficulty: "Easy",
     category: "Snack",
@@ -297,7 +297,7 @@ export const recipes = [
   {
     id: "recipe-014",
     title: "Garlic Butter Shrimp",
-    image: "/placeholders/recipe.png",
+    image: "/placeholders/recipe.svg",
     cookTime: 15,
     difficulty: "Medium",
     category: "Dinner",
