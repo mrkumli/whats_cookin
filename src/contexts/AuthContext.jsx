@@ -2,7 +2,7 @@ import { createContext, useContext } from "react";
 
 // AuthContext (placeholder)
 //
-// TODO: Wire this up to Firebase Authentication
+// TODO: In a future prompt, wire this up to Firebase Authentication
 // (onAuthStateChanged) so `currentUser` reflects the real logged-in
 // user, and expose loading state while that check happens.
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Modal from "../components/Modal";
 import EmptyState from "../components/EmptyState";
+import IngredientStatusIcon from "../components/IngredientStatusIcon";
 import { recipes } from "../data/recipes";
 import { isIngredientInPantry } from "../utils/matching";
 import { getAvailableSubstitutes } from "../utils/substitution";
@@ -121,8 +122,11 @@ function RecipeDetails() {
                   }
                 >
                   <div className="ingredient-list__info">
-                    <span className="ingredient-list__name">
-                      {ingredient.name}
+                    <span className="ingredient-list__name-row">
+                      <IngredientStatusIcon available={available} />
+                      <span className="ingredient-list__name">
+                        {ingredient.name}
+                      </span>
                     </span>
                     <span className="ingredient-list__qty">
                       {ingredient.quantity}

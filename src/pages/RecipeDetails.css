@@ -82,6 +82,12 @@
   gap: 0.15rem;
 }
 
+.ingredient-list__name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .ingredient-list__name {
   font-weight: 600;
 }
