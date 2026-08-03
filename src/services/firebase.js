@@ -1,6 +1,6 @@
 // Firebase initialization (placeholder)
 //
-// TODO: In a future prompt, initialize the Firebase app here using
+// TODO: Initialize the Firebase app here using
 // firebaseConfig (from environment variables) and export the
 // `auth` and `db` instances for use across the app.
 //
