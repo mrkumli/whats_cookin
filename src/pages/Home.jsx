@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
+import Filters from "../components/Filters";
 import RecipeCard from "../components/RecipeCard";
 import RecipeCardSkeleton from "../components/RecipeCardSkeleton";
 import EmptyState from "../components/EmptyState";
@@ -10,6 +11,7 @@ import { usePantry } from "../hooks/usePantry";
 import "./Home.css";
 
 const SKELETON_COUNT = 3;
+const ALL_OPTION = "All";
 
 // Checks whether a recipe matches the search term, by title or by
 // any of its ingredient names.
@@ -22,17 +24,31 @@ function matchesSearch(recipe, term) {
   );
 }
 
+// Checks whether a recipe satisfies the active cuisine / time-of-day
+// filters. "All" for either filter means that dimension is unrestricted.
+function matchesFilters(recipe, cuisine, timeOfDay) {
+  const matchesCuisine = cuisine === ALL_OPTION || recipe.cuisine === cuisine;
+  const matchesTimeOfDay =
+    timeOfDay === ALL_OPTION || recipe.category === timeOfDay;
+  return matchesCuisine && matchesTimeOfDay;
+}
+
 function Home() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [cuisineFilter, setCuisineFilter] = useState(ALL_OPTION);
+  const [timeOfDayFilter, setTimeOfDayFilter] = useState(ALL_OPTION);
   const normalizedSearch = searchTerm.trim().toLowerCase();
   const { items: pantryItems, loading: pantryLoading } = usePantry();
 
   const filteredRecipes = useMemo(() => {
-    if (!normalizedSearch) {
-      return recipes;
-    }
-    return recipes.filter((recipe) => matchesSearch(recipe, normalizedSearch));
-  }, [normalizedSearch]);
+    return recipes.filter((recipe) => {
+      const searchMatch =
+        !normalizedSearch || matchesSearch(recipe, normalizedSearch);
+      return (
+        searchMatch && matchesFilters(recipe, cuisineFilter, timeOfDayFilter)
+      );
+    });
+  }, [normalizedSearch, cuisineFilter, timeOfDayFilter]);
 
   const cookableRecipes = useMemo(
     () =>
@@ -53,8 +69,27 @@ function Home() {
   );
 
   const hasNoRecipesAtAll = recipes.length === 0;
-  const hasNoSearchResults = !hasNoRecipesAtAll && filteredRecipes.length === 0;
+  const hasActiveFilters =
+    cuisineFilter !== ALL_OPTION || timeOfDayFilter !== ALL_OPTION;
+  const hasNoResults = !hasNoRecipesAtAll && filteredRecipes.length === 0;
   const isPantryEmpty = !pantryLoading && pantryItems.length === 0;
+
+  function resetFilters() {
+    setCuisineFilter(ALL_OPTION);
+    setTimeOfDayFilter(ALL_OPTION);
+  }
+
+  // Builds a message for the "no results" empty state that reflects
+  // whichever combination of search + filters is currently active.
+  function noResultsMessage() {
+    if (searchTerm && hasActiveFilters) {
+      return `No recipes match "${searchTerm}" with the selected filters.`;
+    }
+    if (searchTerm) {
+      return `No recipes match "${searchTerm}". Try a different recipe name or ingredient.`;
+    }
+    return "No recipes match the selected filters. Try a different combination.";
+  }
 
   return (
     <div className="home-page">
@@ -65,6 +100,13 @@ function Home() {
         </p>
         <SearchBar value={searchTerm} onChange={setSearchTerm} />
       </section>
+
+      <Filters
+        cuisine={cuisineFilter}
+        onCuisineChange={setCuisineFilter}
+        timeOfDay={timeOfDayFilter}
+        onTimeOfDayChange={setTimeOfDayFilter}
+      />
 
       {isPantryEmpty && (
         <EmptyState
@@ -81,14 +123,21 @@ function Home() {
         />
       )}
 
-      {hasNoSearchResults && (
+      {hasNoResults && (
         <EmptyState
-          title={`No recipes match "${searchTerm}"`}
-          message="Try a different recipe name or ingredient."
+          title="No matching recipes"
+          message={noResultsMessage()}
+          action={
+            hasActiveFilters && (
+              <button type="button" className="home-reset-filters" onClick={resetFilters}>
+                Reset filters
+              </button>
+            )
+          }
         />
       )}
 
-      {!hasNoRecipesAtAll && !hasNoSearchResults && (
+      {!hasNoRecipesAtAll && !hasNoResults && (
         <>
           <section className="home-section">
             <h2>Recipes You Can Make</h2>

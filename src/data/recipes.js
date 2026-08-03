@@ -8,11 +8,12 @@
 // Recipe shape:
 // {
 //   id: string,
+//   cuisine: string,         // e.g. "Italian", "Mexican" -- used by the Filters control
 //   title: string,
 //   image: string,          // placeholder path/URL for now
 //   cookTime: number,        // minutes
 //   difficulty: "Easy" | "Medium" | "Hard",
-//   category: string,
+//   category: string,        // time-of-day bucket, e.g. "Breakfast", "Dinner" -- also used by Filters
 //   ingredients: [{ name: string, quantity: string }],
 //   instructions: string[],  // ordered steps
 // }
@@ -20,6 +21,7 @@
 export const recipes = [
   {
     id: "recipe-001",
+    cuisine: "American",
     title: "Classic Scrambled Eggs",
     image: "/placeholders/recipe.svg",
     cookTime: 10,
@@ -40,6 +42,7 @@ export const recipes = [
   },
   {
     id: "recipe-002",
+    cuisine: "Italian",
     title: "Simple Tomato Pasta",
     image: "/placeholders/recipe.svg",
     cookTime: 25,
@@ -62,6 +65,7 @@ export const recipes = [
   },
   {
     id: "recipe-003",
+    cuisine: "Indian",
     title: "Greek Yogurt Chicken Marinade",
     image: "/placeholders/recipe.svg",
     cookTime: 35,
@@ -84,6 +88,7 @@ export const recipes = [
   },
   {
     id: "recipe-004",
+    cuisine: "Chinese",
     title: "Veggie Stir Fry",
     image: "/placeholders/recipe.svg",
     cookTime: 20,
@@ -106,6 +111,7 @@ export const recipes = [
   },
   {
     id: "recipe-005",
+    cuisine: "American",
     title: "Banana Pancakes",
     image: "/placeholders/recipe.svg",
     cookTime: 20,
@@ -128,6 +134,7 @@ export const recipes = [
   },
   {
     id: "recipe-006",
+    cuisine: "Indian",
     title: "Lentil Soup",
     image: "/placeholders/recipe.svg",
     cookTime: 40,
@@ -150,6 +157,7 @@ export const recipes = [
   },
   {
     id: "recipe-007",
+    cuisine: "American",
     title: "Grilled Cheese Sandwich",
     image: "/placeholders/recipe.svg",
     cookTime: 10,
@@ -169,6 +177,7 @@ export const recipes = [
   },
   {
     id: "recipe-008",
+    cuisine: "Mexican",
     title: "Beef Tacos",
     image: "/placeholders/recipe.svg",
     cookTime: 30,
@@ -191,6 +200,7 @@ export const recipes = [
   },
   {
     id: "recipe-009",
+    cuisine: "American",
     title: "Overnight Oats",
     image: "/placeholders/recipe.svg",
     cookTime: 5,
@@ -211,6 +221,7 @@ export const recipes = [
   },
   {
     id: "recipe-010",
+    cuisine: "Italian",
     title: "Caprese Salad",
     image: "/placeholders/recipe.svg",
     cookTime: 10,
@@ -232,6 +243,7 @@ export const recipes = [
   },
   {
     id: "recipe-011",
+    cuisine: "American",
     title: "Chocolate Mug Cake",
     image: "/placeholders/recipe.svg",
     cookTime: 5,
@@ -254,6 +266,7 @@ export const recipes = [
   },
   {
     id: "recipe-012",
+    cuisine: "Indian",
     title: "Chickpea Curry",
     image: "/placeholders/recipe.svg",
     cookTime: 35,
@@ -276,6 +289,7 @@ export const recipes = [
   },
   {
     id: "recipe-013",
+    cuisine: "American",
     title: "Fruit and Yogurt Parfait",
     image: "/placeholders/recipe.svg",
     cookTime: 5,
@@ -296,6 +310,7 @@ export const recipes = [
   },
   {
     id: "recipe-014",
+    cuisine: "Italian",
     title: "Garlic Butter Shrimp",
     image: "/placeholders/recipe.svg",
     cookTime: 15,
