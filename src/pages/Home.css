@@ -21,9 +21,24 @@
   color: var(--color-text-muted);
 }
 
-.search-bar {
-  max-width: 480px;
+.home-search-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  max-width: 560px;
   margin: 0 auto;
+}
+
+.home-search-row .search-bar {
+  flex: 1;
+  min-width: 0;
+}
+
+.home-hero .active-filter-chips {
+  max-width: 560px;
+  margin: var(--space-sm) auto 0;
+  text-align: left;
 }
 
 .search-bar__input {

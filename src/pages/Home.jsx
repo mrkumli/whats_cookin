@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
-import Filters from "../components/Filters";
+import FilterButton from "../components/FilterButton";
+import FilterModal from "../components/FilterModal";
+import ActiveFilterChips from "../components/ActiveFilterChips";
 import RecipeCard from "../components/RecipeCard";
 import RecipeCardSkeleton from "../components/RecipeCardSkeleton";
 import EmptyState from "../components/EmptyState";
@@ -11,7 +13,6 @@ import { usePantry } from "../hooks/usePantry";
 import "./Home.css";
 
 const SKELETON_COUNT = 3;
-const ALL_OPTION = "All";
 
 // Checks whether a recipe matches the search term, by title or by
 // any of its ingredient names.
@@ -24,19 +25,23 @@ function matchesSearch(recipe, term) {
   );
 }
 
-// Checks whether a recipe satisfies the active cuisine / time-of-day
-// filters. "All" for either filter means that dimension is unrestricted.
-function matchesFilters(recipe, cuisine, timeOfDay) {
-  const matchesCuisine = cuisine === ALL_OPTION || recipe.cuisine === cuisine;
-  const matchesTimeOfDay =
-    timeOfDay === ALL_OPTION || recipe.category === timeOfDay;
-  return matchesCuisine && matchesTimeOfDay;
+// Multi-select filter check:
+// - No selections in a category = that category is unrestricted ("All").
+// - Multiple selections in a category = match ANY of them.
+// - Selections in both categories = recipe must satisfy BOTH.
+function matchesFilters(recipe, selectedCuisines, selectedTimes) {
+  const cuisineMatch =
+    selectedCuisines.length === 0 || selectedCuisines.includes(recipe.cuisine);
+  const timeMatch =
+    selectedTimes.length === 0 || selectedTimes.includes(recipe.category);
+  return cuisineMatch && timeMatch;
 }
 
 function Home() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [cuisineFilter, setCuisineFilter] = useState(ALL_OPTION);
-  const [timeOfDayFilter, setTimeOfDayFilter] = useState(ALL_OPTION);
+  const [appliedCuisines, setAppliedCuisines] = useState([]);
+  const [appliedTimes, setAppliedTimes] = useState([]);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const normalizedSearch = searchTerm.trim().toLowerCase();
   const { items: pantryItems, loading: pantryLoading } = usePantry();
 
@@ -45,10 +50,10 @@ function Home() {
       const searchMatch =
         !normalizedSearch || matchesSearch(recipe, normalizedSearch);
       return (
-        searchMatch && matchesFilters(recipe, cuisineFilter, timeOfDayFilter)
+        searchMatch && matchesFilters(recipe, appliedCuisines, appliedTimes)
       );
     });
-  }, [normalizedSearch, cuisineFilter, timeOfDayFilter]);
+  }, [normalizedSearch, appliedCuisines, appliedTimes]);
 
   const cookableRecipes = useMemo(
     () =>
@@ -69,14 +74,27 @@ function Home() {
   );
 
   const hasNoRecipesAtAll = recipes.length === 0;
-  const hasActiveFilters =
-    cuisineFilter !== ALL_OPTION || timeOfDayFilter !== ALL_OPTION;
+  const hasActiveFilters = appliedCuisines.length > 0 || appliedTimes.length > 0;
   const hasNoResults = !hasNoRecipesAtAll && filteredRecipes.length === 0;
   const isPantryEmpty = !pantryLoading && pantryItems.length === 0;
 
+  function removeCuisineFilter(cuisine) {
+    setAppliedCuisines((current) => current.filter((item) => item !== cuisine));
+  }
+
+  function removeTimeFilter(time) {
+    setAppliedTimes((current) => current.filter((item) => item !== time));
+  }
+
+  function handleApplyFilters(cuisines, times) {
+    setAppliedCuisines(cuisines);
+    setAppliedTimes(times);
+    setIsFilterModalOpen(false);
+  }
+
   function resetFilters() {
-    setCuisineFilter(ALL_OPTION);
-    setTimeOfDayFilter(ALL_OPTION);
+    setAppliedCuisines([]);
+    setAppliedTimes([]);
   }
 
   // Builds a message for the "no results" empty state that reflects
@@ -98,15 +116,31 @@ function Home() {
         <p className="home-hero__subtitle">
           Recipes matched against what's already in your pantry.
         </p>
-        <SearchBar value={searchTerm} onChange={setSearchTerm} />
+
+        <div className="home-search-row">
+          <SearchBar value={searchTerm} onChange={setSearchTerm} />
+          <FilterButton
+            onClick={() => setIsFilterModalOpen(true)}
+            activeCount={appliedCuisines.length + appliedTimes.length}
+          />
+        </div>
+
+        <ActiveFilterChips
+          cuisines={appliedCuisines}
+          times={appliedTimes}
+          onRemoveCuisine={removeCuisineFilter}
+          onRemoveTime={removeTimeFilter}
+        />
       </section>
 
-      <Filters
-        cuisine={cuisineFilter}
-        onCuisineChange={setCuisineFilter}
-        timeOfDay={timeOfDayFilter}
-        onTimeOfDayChange={setTimeOfDayFilter}
-      />
+      {isFilterModalOpen && (
+        <FilterModal
+          initialCuisines={appliedCuisines}
+          initialTimes={appliedTimes}
+          onApply={handleApplyFilters}
+          onClose={() => setIsFilterModalOpen(false)}
+        />
+      )}
 
       {isPantryEmpty && (
         <EmptyState
@@ -129,7 +163,11 @@ function Home() {
           message={noResultsMessage()}
           action={
             hasActiveFilters && (
-              <button type="button" className="home-reset-filters" onClick={resetFilters}>
+              <button
+                type="button"
+                className="home-reset-filters"
+                onClick={resetFilters}
+              >
                 Reset filters
               </button>
             )

@@ -1,0 +1,103 @@
+.filter-modal__section {
+  margin-bottom: var(--space-md);
+}
+
+.filter-modal__section-title {
+  margin: 0 0 var(--space-xs);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.filter-modal__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-modal__option {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 0.35rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.filter-modal__option:hover {
+  border-color: var(--color-primary);
+}
+
+.filter-modal__option:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.filter-modal__option--active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.filter-modal__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.filter-modal__clear {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 0.55rem 1rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: var(--color-text-muted);
+}
+
+.filter-modal__clear:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.filter-modal__apply {
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 0.55rem 1.25rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: #fff;
+}
+
+.filter-modal__apply:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.filter-modal__clear:focus-visible,
+.filter-modal__apply:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .filter-modal__actions {
+    flex-direction: column-reverse;
+  }
+
+  .filter-modal__clear,
+  .filter-modal__apply {
+    width: 100%;
+    text-align: center;
+  }
+}
