@@ -63,10 +63,6 @@
   color: var(--color-text);
 }
 
-.home-section__empty {
-  color: var(--color-text-muted);
-}
-
 .home-reset-filters {
   background-color: var(--color-primary);
   color: #fff;

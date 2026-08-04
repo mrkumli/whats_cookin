@@ -33,43 +33,46 @@ function Home() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
   const { items: pantryItems, loading: pantryLoading } = usePantry();
+
+  // "Recommended Recipes" -- search-aware (calls RecipeService's
+  // search when there's a query, random recipes otherwise), then
+  // narrowed to what the current pantry can actually make.
   const {
-    recipes,
-    loading: recipesLoading,
-    error: recipesError,
-    retry: retryRecipes,
+    recipes: recommendedPool,
+    loading: recommendedLoading,
+    error: recommendedError,
+    retry: retryRecommended,
   } = useRecipes(searchTerm);
 
-  const filteredRecipes = useMemo(
-    () =>
-      recipes.filter((recipe) =>
-        matchesFilters(recipe, appliedCuisines, appliedTimes)
-      ),
-    [recipes, appliedCuisines, appliedTimes]
-  );
-
-  const cookableRecipes = useMemo(
-    () =>
-      filteredRecipes.filter((recipe) => isRecipeCookable(recipe, pantryItems)),
-    [filteredRecipes, pantryItems]
-  );
-
-  const missingIngredientRecipes = useMemo(
-    () =>
-      filteredRecipes
-        .filter((recipe) => !isRecipeCookable(recipe, pantryItems))
-        .sort(
-          (a, b) =>
-            countMissingIngredients(a, pantryItems) -
-            countMissingIngredients(b, pantryItems)
-        ),
-    [filteredRecipes, pantryItems]
-  );
+  // "Random Recipes" -- an independent, always-random discovery feed
+  // (RecipeService's getRandomRecipes), deliberately NOT tied to the
+  // search box, so there's always something to browse regardless of
+  // what's been searched. Still respects the cuisine/time filters.
+  const {
+    recipes: randomPool,
+    loading: randomLoading,
+    error: randomError,
+    retry: retryRandom,
+  } = useRecipes("");
 
   const hasActiveFilters = appliedCuisines.length > 0 || appliedTimes.length > 0;
-  const hasNoResults =
-    !recipesLoading && !recipesError && filteredRecipes.length === 0;
   const isPantryEmpty = !pantryLoading && pantryItems.length === 0;
+
+  const recommendedRecipes = useMemo(
+    () =>
+      recommendedPool
+        .filter((recipe) => matchesFilters(recipe, appliedCuisines, appliedTimes))
+        .filter((recipe) => isRecipeCookable(recipe, pantryItems)),
+    [recommendedPool, appliedCuisines, appliedTimes, pantryItems]
+  );
+
+  const randomRecipes = useMemo(
+    () =>
+      randomPool.filter((recipe) =>
+        matchesFilters(recipe, appliedCuisines, appliedTimes)
+      ),
+    [randomPool, appliedCuisines, appliedTimes]
+  );
 
   function removeCuisineFilter(cuisine) {
     setAppliedCuisines((current) => current.filter((item) => item !== cuisine));
@@ -90,16 +93,17 @@ function Home() {
     setAppliedTimes([]);
   }
 
-  // Builds a message for the "no results" empty state that reflects
-  // whichever combination of search + filters is currently active.
-  function noResultsMessage() {
+  function recommendedEmptyMessage() {
     if (searchTerm && hasActiveFilters) {
-      return `No recipes match "${searchTerm}" with the selected filters.`;
+      return `Nothing you can make matches "${searchTerm}" with the selected filters.`;
     }
     if (searchTerm) {
-      return `No recipes match "${searchTerm}". Try a different recipe name or ingredient.`;
+      return `Nothing you can make matches "${searchTerm}" yet.`;
     }
-    return "No recipes match the selected filters. Try a different combination.";
+    if (hasActiveFilters) {
+      return "Nothing you can make matches the selected filters yet.";
+    }
+    return "Nothing fully cookable yet with what's on hand.";
   }
 
   return (
@@ -143,89 +147,107 @@ function Home() {
         />
       )}
 
-      {recipesError && (
-        <EmptyState
-          title="Couldn't load recipes"
-          message={recipesError}
-          action={
-            <button
-              type="button"
-              className="home-reset-filters"
-              onClick={retryRecipes}
-            >
-              Try again
-            </button>
-          }
-        />
-      )}
-
-      {!recipesError && hasNoResults && (
-        <EmptyState
-          title="No matching recipes"
-          message={noResultsMessage()}
-          action={
-            hasActiveFilters && (
+      <section className="home-section">
+        <h2>Recommended Recipes</h2>
+        {recommendedLoading || pantryLoading ? (
+          <div className="recipe-grid">
+            {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
+              <RecipeCardSkeleton key={index} />
+            ))}
+          </div>
+        ) : recommendedError ? (
+          <EmptyState
+            title="Couldn't load recipes"
+            message={recommendedError}
+            action={
               <button
                 type="button"
                 className="home-reset-filters"
-                onClick={resetFilters}
+                onClick={retryRecommended}
               >
-                Reset filters
+                Try again
               </button>
-            )
-          }
-        />
-      )}
+            }
+          />
+        ) : recommendedRecipes.length === 0 ? (
+          <EmptyState
+            title="No recommended recipes"
+            message={recommendedEmptyMessage()}
+            action={
+              hasActiveFilters && (
+                <button
+                  type="button"
+                  className="home-reset-filters"
+                  onClick={resetFilters}
+                >
+                  Reset filters
+                </button>
+              )
+            }
+          />
+        ) : (
+          <div className="recipe-grid">
+            {recommendedRecipes.map((recipe) => (
+              <RecipeCard key={recipe.id} recipe={recipe} missingCount={0} />
+            ))}
+          </div>
+        )}
+      </section>
 
-      {!recipesError && !hasNoResults && (
-        <>
-          <section className="home-section">
-            <h2>Recipes You Can Make</h2>
-            {recipesLoading || pantryLoading ? (
-              <div className="recipe-grid">
-                {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
-                  <RecipeCardSkeleton key={index} />
-                ))}
-              </div>
-            ) : cookableRecipes.length === 0 ? (
-              <p className="home-section__empty">
-                Nothing fully cookable yet with what's on hand.
-              </p>
-            ) : (
-              <div className="recipe-grid">
-                {cookableRecipes.map((recipe) => (
-                  <RecipeCard key={recipe.id} recipe={recipe} missingCount={0} />
-                ))}
-              </div>
-            )}
-          </section>
-
-          <section className="home-section">
-            <h2>Recipes Missing Ingredients</h2>
-            {recipesLoading || pantryLoading ? (
-              <div className="recipe-grid">
-                {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
-                  <RecipeCardSkeleton key={index} />
-                ))}
-              </div>
-            ) : missingIngredientRecipes.length === 0 ? (
-              <p className="home-section__empty">
-                Everything here is ready to cook!
-              </p>
-            ) : (
-              <div className="recipe-grid">
-                {missingIngredientRecipes.map((recipe) => (
-                  <RecipeCard
-                    key={recipe.id}
-                    recipe={recipe}
-                    missingCount={countMissingIngredients(recipe, pantryItems)}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        </>
-      )}
+      <section className="home-section">
+        <h2>Random Recipes</h2>
+        {randomLoading || pantryLoading ? (
+          <div className="recipe-grid">
+            {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
+              <RecipeCardSkeleton key={index} />
+            ))}
+          </div>
+        ) : randomError ? (
+          <EmptyState
+            title="Couldn't load recipes"
+            message={randomError}
+            action={
+              <button
+                type="button"
+                className="home-reset-filters"
+                onClick={retryRandom}
+              >
+                Try again
+              </button>
+            }
+          />
+        ) : randomRecipes.length === 0 ? (
+          <EmptyState
+            title="No random recipes"
+            message={
+              hasActiveFilters
+                ? "No random recipes match the selected filters right now."
+                : "No recipes were returned. Try again in a moment."
+            }
+            action={
+              hasActiveFilters && (
+                <button
+                  type="button"
+                  className="home-reset-filters"
+                  onClick={resetFilters}
+                >
+                  Reset filters
+                </button>
+              )
+            }
+          />
+        ) : (
+          <div className="recipe-grid">
+            {randomRecipes.map((recipe) => (
+              <RecipeCard
+                key={recipe.id}
+                recipe={recipe}
+                missingCount={countMissingIngredients(recipe, pantryItems)}
+              />
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
