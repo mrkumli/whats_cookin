@@ -3,17 +3,17 @@ import { Link, useParams } from "react-router-dom";
 import Modal from "../components/Modal";
 import EmptyState from "../components/EmptyState";
 import IngredientStatusIcon from "../components/IngredientStatusIcon";
-import { recipes } from "../data/recipes";
+import { getRecipeDetails } from "../services/recipeService";
 import { isIngredientInPantry } from "../utils/matching";
 import { getAvailableSubstitutes } from "../utils/substitution";
 import { usePantry } from "../hooks/usePantry";
 import "./RecipeDetails.css";
 
 // Builds the initial "displayed ingredients" list for a recipe: the
-// same ingredients as the recipe data, plus a `substitutedFrom` flag
-// (null until the user picks a substitute). This local copy is what
-// gets edited -- the original recipe object in data/recipes.js is
-// never touched.
+// same ingredients as the fetched recipe, plus a `substitutedFrom`
+// flag (null until the user picks a substitute). This local copy is
+// what gets edited -- the recipe object returned by the recipe
+// service is never mutated.
 function buildDisplayedIngredients(recipe) {
   return recipe.ingredients.map((ingredient) => ({
     ...ingredient,
@@ -23,27 +23,63 @@ function buildDisplayedIngredients(recipe) {
 
 function RecipeDetails() {
   const { recipeId } = useParams();
-  const recipe = recipes.find((item) => item.id === recipeId);
   const { items: pantryItems, loading: pantryLoading } = usePantry();
 
-  const [displayedIngredients, setDisplayedIngredients] = useState(() =>
-    recipe ? buildDisplayedIngredients(recipe) : []
-  );
+  const [recipe, setRecipe] = useState(null);
+  const [loadingRecipe, setLoadingRecipe] = useState(true);
+  const [recipeError, setRecipeError] = useState(null);
+  const [displayedIngredients, setDisplayedIngredients] = useState([]);
   const [activeIngredientIndex, setActiveIngredientIndex] = useState(null);
 
-  // Reset the local ingredient list whenever the recipe (route
-  // param) changes, so substitutions don't leak between recipes.
+  // Fetch the recipe whenever the route param changes. A friendly
+  // error is stored (not thrown) on failure so a bad id or a flaky
+  // request shows an empty state instead of crashing the page.
   useEffect(() => {
-    setDisplayedIngredients(recipe ? buildDisplayedIngredients(recipe) : []);
+    let cancelled = false;
+    setLoadingRecipe(true);
+    setRecipeError(null);
+    setRecipe(null);
     setActiveIngredientIndex(null);
-  }, [recipe]);
 
-  if (!recipe) {
+    getRecipeDetails(recipeId)
+      .then((result) => {
+        if (!cancelled) {
+          setRecipe(result);
+          setDisplayedIngredients(buildDisplayedIngredients(result));
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setRecipeError(
+            error.message || "Something went wrong loading this recipe."
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoadingRecipe(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [recipeId]);
+
+  if (loadingRecipe) {
+    return (
+      <div className="page">
+        <p className="recipe-details__loading">Loading recipe...</p>
+      </div>
+    );
+  }
+
+  if (recipeError || !recipe) {
     return (
       <div className="page">
         <EmptyState
-          title="Recipe not found"
-          message="We couldn't find that recipe."
+          title="Couldn't load this recipe"
+          message={recipeError || "We couldn't find that recipe."}
           action={<Link to="/">← Back to Home</Link>}
         />
       </div>
@@ -105,6 +141,10 @@ function RecipeDetails() {
         <h2>Ingredients</h2>
         {pantryLoading ? (
           <p className="recipe-details__loading">Checking your pantry...</p>
+        ) : displayedIngredients.length === 0 ? (
+          <p className="recipe-details__loading">
+            No ingredient information available for this recipe.
+          </p>
         ) : (
           <ul className="ingredient-list">
             {displayedIngredients.map((ingredient, index) => {
@@ -157,11 +197,17 @@ function RecipeDetails() {
 
       <section className="recipe-details__section">
         <h2>Instructions</h2>
-        <ol className="instruction-list">
-          {recipe.instructions.map((step, index) => (
-            <li key={index}>{step}</li>
-          ))}
-        </ol>
+        {recipe.instructions.length === 0 ? (
+          <p className="recipe-details__loading">
+            No instructions available for this recipe.
+          </p>
+        ) : (
+          <ol className="instruction-list">
+            {recipe.instructions.map((step, index) => (
+              <li key={index}>{step}</li>
+            ))}
+          </ol>
+        )}
       </section>
 
       {activeIngredient && (

@@ -7,23 +7,12 @@ import ActiveFilterChips from "../components/ActiveFilterChips";
 import RecipeCard from "../components/RecipeCard";
 import RecipeCardSkeleton from "../components/RecipeCardSkeleton";
 import EmptyState from "../components/EmptyState";
-import { recipes } from "../data/recipes";
 import { isRecipeCookable, countMissingIngredients } from "../utils/matching";
 import { usePantry } from "../hooks/usePantry";
+import { useRecipes } from "../hooks/useRecipes";
 import "./Home.css";
 
 const SKELETON_COUNT = 3;
-
-// Checks whether a recipe matches the search term, by title or by
-// any of its ingredient names.
-function matchesSearch(recipe, term) {
-  if (recipe.title.toLowerCase().includes(term)) {
-    return true;
-  }
-  return recipe.ingredients.some((ingredient) =>
-    ingredient.name.toLowerCase().includes(term)
-  );
-}
 
 // Multi-select filter check:
 // - No selections in a category = that category is unrestricted ("All").
@@ -42,18 +31,22 @@ function Home() {
   const [appliedCuisines, setAppliedCuisines] = useState([]);
   const [appliedTimes, setAppliedTimes] = useState([]);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const normalizedSearch = searchTerm.trim().toLowerCase();
-  const { items: pantryItems, loading: pantryLoading } = usePantry();
 
-  const filteredRecipes = useMemo(() => {
-    return recipes.filter((recipe) => {
-      const searchMatch =
-        !normalizedSearch || matchesSearch(recipe, normalizedSearch);
-      return (
-        searchMatch && matchesFilters(recipe, appliedCuisines, appliedTimes)
-      );
-    });
-  }, [normalizedSearch, appliedCuisines, appliedTimes]);
+  const { items: pantryItems, loading: pantryLoading } = usePantry();
+  const {
+    recipes,
+    loading: recipesLoading,
+    error: recipesError,
+    retry: retryRecipes,
+  } = useRecipes(searchTerm);
+
+  const filteredRecipes = useMemo(
+    () =>
+      recipes.filter((recipe) =>
+        matchesFilters(recipe, appliedCuisines, appliedTimes)
+      ),
+    [recipes, appliedCuisines, appliedTimes]
+  );
 
   const cookableRecipes = useMemo(
     () =>
@@ -73,9 +66,9 @@ function Home() {
     [filteredRecipes, pantryItems]
   );
 
-  const hasNoRecipesAtAll = recipes.length === 0;
   const hasActiveFilters = appliedCuisines.length > 0 || appliedTimes.length > 0;
-  const hasNoResults = !hasNoRecipesAtAll && filteredRecipes.length === 0;
+  const hasNoResults =
+    !recipesLoading && !recipesError && filteredRecipes.length === 0;
   const isPantryEmpty = !pantryLoading && pantryItems.length === 0;
 
   function removeCuisineFilter(cuisine) {
@@ -150,14 +143,23 @@ function Home() {
         />
       )}
 
-      {hasNoRecipesAtAll && (
+      {recipesError && (
         <EmptyState
-          title="No recipes available"
-          message="Check back soon -- new recipes are on the way."
+          title="Couldn't load recipes"
+          message={recipesError}
+          action={
+            <button
+              type="button"
+              className="home-reset-filters"
+              onClick={retryRecipes}
+            >
+              Try again
+            </button>
+          }
         />
       )}
 
-      {hasNoResults && (
+      {!recipesError && hasNoResults && (
         <EmptyState
           title="No matching recipes"
           message={noResultsMessage()}
@@ -175,11 +177,11 @@ function Home() {
         />
       )}
 
-      {!hasNoRecipesAtAll && !hasNoResults && (
+      {!recipesError && !hasNoResults && (
         <>
           <section className="home-section">
             <h2>Recipes You Can Make</h2>
-            {pantryLoading ? (
+            {recipesLoading || pantryLoading ? (
               <div className="recipe-grid">
                 {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
                   <RecipeCardSkeleton key={index} />
@@ -200,7 +202,7 @@ function Home() {
 
           <section className="home-section">
             <h2>Recipes Missing Ingredients</h2>
-            {pantryLoading ? (
+            {recipesLoading || pantryLoading ? (
               <div className="recipe-grid">
                 {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
                   <RecipeCardSkeleton key={index} />
