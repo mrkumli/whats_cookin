@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
 import { getRandomRecipes, searchRecipes } from "../services/recipeService";
 
-const SEARCH_DEBOUNCE_MS = 400;
-
 // usePantry's counterpart for recipes: the single place Home reads
 // recipe data from. When `searchTerm` is empty it loads a batch of
 // random recipes; when there's a search term, it calls the recipe
-// service's search after a short debounce so a fast typist doesn't
-// fire a request per keystroke.
+// service's search.
+//
+// NOTE: debouncing search-as-you-type now happens INSIDE
+// RecipeService.searchRecipes() itself (part of its request-
+// optimization layer), not here -- calling it on every keystroke is
+// intentional and safe; the service coalesces rapid calls into one
+// request. Debouncing here too would just add a second, redundant
+// delay on top of the service's.
 //
 // NOTE: cuisine/time-of-day filtering still happens client-side (in
 // Home.jsx) over whatever this hook returns, same as it did with the
@@ -28,39 +32,31 @@ export function useRecipes(searchTerm) {
     setLoading(true);
     setError(null);
 
-    const timer = setTimeout(
-      () => {
-        const fetchRecipes = trimmed
-          ? searchRecipes(trimmed)
-          : getRandomRecipes();
+    const fetchRecipes = trimmed ? searchRecipes(trimmed) : getRandomRecipes();
 
-        fetchRecipes
-          .then((results) => {
-            if (!cancelled) {
-              setRecipes(results);
-            }
-          })
-          .catch((fetchError) => {
-            if (!cancelled) {
-              setError(
-                fetchError.message ||
-                  "Something went wrong loading recipes. Please try again."
-              );
-              setRecipes([]);
-            }
-          })
-          .finally(() => {
-            if (!cancelled) {
-              setLoading(false);
-            }
-          });
-      },
-      trimmed ? SEARCH_DEBOUNCE_MS : 0
-    );
+    fetchRecipes
+      .then((results) => {
+        if (!cancelled) {
+          setRecipes(results);
+        }
+      })
+      .catch((fetchError) => {
+        if (!cancelled) {
+          setError(
+            fetchError.message ||
+              "Something went wrong loading recipes. Please try again."
+          );
+          setRecipes([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
 
     return () => {
       cancelled = true;
-      clearTimeout(timer);
     };
   }, [searchTerm, retryToken]);
 

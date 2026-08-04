@@ -22,6 +22,8 @@
 // utils/matching.js, utils/substitution.js, RecipeCard, and the
 // filters all keep working unchanged.
 
+import { classifyCuisine, classifyMealTime } from "../utils/recipeClassification";
+
 const BASE_URL = "https://api.spoonacular.com/recipes";
 const PLACEHOLDER_IMAGE = "/placeholders/recipe.svg";
 
@@ -85,10 +87,6 @@ async function request(path, params = {}) {
 
 // ---- Normalization -------------------------------------------------
 
-function titleCase(value) {
-  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
-}
-
 // Spoonacular doesn't provide a difficulty rating, so this is a
 // simple, documented heuristic based on cook time -- not a stand-in
 // for real recipe difficulty data.
@@ -103,29 +101,6 @@ function estimateDifficulty(readyInMinutes) {
     return "Medium";
   }
   return "Hard";
-}
-
-const CATEGORY_MATCHERS = [
-  { category: "Breakfast", dishTypes: ["breakfast", "brunch"] },
-  { category: "Lunch", dishTypes: ["lunch"] },
-  { category: "Dessert", dishTypes: ["dessert"] },
-  { category: "Snack", dishTypes: ["snack", "appetizer", "antipasti"] },
-  { category: "Dinner", dishTypes: ["dinner", "main course", "main dish"] },
-];
-
-// Maps Spoonacular's `dishTypes` list onto the app's single
-// time-of-day category. Falls back to "Dinner" since most Spoonacular
-// recipes are main dishes without an explicit meal-time tag.
-function mapCategory(dishTypes = []) {
-  const lower = dishTypes.map((type) => type.toLowerCase());
-  const match = CATEGORY_MATCHERS.find(({ dishTypes: candidates }) =>
-    candidates.some((candidate) => lower.includes(candidate))
-  );
-  return match ? match.category : "Dinner";
-}
-
-function mapCuisine(cuisines = []) {
-  return cuisines.length > 0 ? titleCase(cuisines[0]) : "Other";
 }
 
 function normalizeIngredients(extendedIngredients = []) {
@@ -156,13 +131,13 @@ function extractInstructions(raw) {
 export function normalizeRecipe(raw) {
   return {
     id: `sp-${raw.id}`,
-    cuisine: mapCuisine(raw.cuisines),
+    cuisine: classifyCuisine(raw.cuisines),
     title: raw.title || "Untitled recipe",
     image: raw.image || PLACEHOLDER_IMAGE,
     cookTime: typeof raw.readyInMinutes === "number" ? raw.readyInMinutes : 30,
     servings: typeof raw.servings === "number" ? raw.servings : null,
     difficulty: estimateDifficulty(raw.readyInMinutes),
-    category: mapCategory(raw.dishTypes),
+    category: classifyMealTime({ title: raw.title, dishTypes: raw.dishTypes }),
     ingredients: normalizeIngredients(raw.extendedIngredients),
     instructions: extractInstructions(raw),
   };
@@ -178,37 +153,306 @@ function toSpoonacularId(id) {
   return match[1];
 }
 
+// ======================================================================
+// Caching & request optimization
+//
+// Goal: minimize Spoonacular API usage during development (the free
+// tier has a small daily quota) without changing what any caller of
+// this service sees or how it's called -- searchRecipes(),
+// getRandomRecipes(), and getRecipeDetails() keep the exact same
+// signatures and return shapes as before.
+//
+// Layering, cheapest/fastest first:
+//   1. In-memory cache (Map)   -- instant, cleared on full page reload
+//   2. localStorage cache      -- survives refresh, expires after 24h
+//   3. In-flight request map   -- de-dupes concurrent identical calls
+//   4. Spoonacular API         -- only reached if 1-3 all miss
+//
+// Every cache entry (memory or localStorage) is stored as
+// { data, timestamp, type }, where `type` is one of CACHE_TYPES below
+// and is only used for bookkeeping/debugging -- lookups are by key.
+// ======================================================================
+
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours, per the spec
+const CACHE_KEY_PREFIX = "whats_cookin:recipe_cache:";
+
+const CACHE_TYPES = {
+  HOMEPAGE: "homepage", // random/recommended recipes shown on Home
+  SEARCH: "search", // complexSearch results
+  DETAILS: "details", // single recipe /information lookups
+};
+
+// In-memory (session) cache -- Map<cacheKey, { data, timestamp, type }>
+const memoryCache = new Map();
+
+// Tracks requests currently in flight so a second call for the exact
+// same thing (e.g. two Home sections both asking for the homepage
+// random batch, or the same recipe opened from two places at once)
+// reuses the same Promise instead of firing a second request.
+const inFlightRequests = new Map();
+
+function isFresh(entry) {
+  return Boolean(entry) && Date.now() - entry.timestamp < CACHE_TTL_MS;
+}
+
+function readMemoryCache(key) {
+  return memoryCache.get(key) || null;
+}
+
+function writeMemoryCache(key, data, type) {
+  memoryCache.set(key, { data, timestamp: Date.now(), type });
+}
+
+function readLocalStorageCache(key) {
+  try {
+    const raw = window.localStorage.getItem(CACHE_KEY_PREFIX + key);
+    if (!raw) {
+      return null;
+    }
+    const entry = JSON.parse(raw);
+    if (!entry || typeof entry.timestamp !== "number") {
+      return null;
+    }
+    return entry;
+  } catch {
+    // Corrupt entry, private-browsing storage restrictions, quota
+    // errors, etc. -- treat it as a cache miss rather than crashing.
+    return null;
+  }
+}
+
+function writeLocalStorageCache(key, data, type) {
+  try {
+    window.localStorage.setItem(
+      CACHE_KEY_PREFIX + key,
+      JSON.stringify({ data, timestamp: Date.now(), type })
+    );
+  } catch {
+    // Storage full or unavailable -- caching is an optimization, not
+    // a requirement, so just skip persisting it for next time.
+  }
+}
+
+// Reads through both cache layers: memory first, then localStorage
+// (promoting a localStorage hit back into memory so this session's
+// next lookup is instant). Returns { entry, fresh }; entry is null on
+// a total miss across both layers.
+function readThroughCache(key) {
+  const memEntry = readMemoryCache(key);
+  if (memEntry) {
+    return { entry: memEntry, fresh: isFresh(memEntry) };
+  }
+
+  const storedEntry = readLocalStorageCache(key);
+  if (storedEntry) {
+    memoryCache.set(key, storedEntry);
+    return { entry: storedEntry, fresh: isFresh(storedEntry) };
+  }
+
+  return { entry: null, fresh: false };
+}
+
+function writeThroughCache(key, data, type) {
+  writeMemoryCache(key, data, type);
+  writeLocalStorageCache(key, data, type);
+}
+
+// The single choke point every cached endpoint goes through:
+// memory/localStorage cache -> in-flight de-dupe -> network -> cache
+// write. On a network failure, falls back to whatever cached copy
+// exists (even if its 24h TTL has technically passed) so a flaky
+// connection doesn't wipe out a perfectly good previous result --
+// an error only reaches the caller when there's truly no cached data
+// at all, per the offline/failure-handling requirement.
+async function cachedFetch(key, type, fetcher) {
+  const { entry, fresh } = readThroughCache(key);
+  if (fresh) {
+    return entry.data;
+  }
+
+  if (inFlightRequests.has(key)) {
+    return inFlightRequests.get(key);
+  }
+
+  const requestPromise = fetcher()
+    .then((data) => {
+      writeThroughCache(key, data, type);
+      return data;
+    })
+    .catch((error) => {
+      if (entry) {
+        // Stale-but-present beats no data at all.
+        return entry.data;
+      }
+      throw error;
+    })
+    .finally(() => {
+      inFlightRequests.delete(key);
+    });
+
+  inFlightRequests.set(key, requestPromise);
+  return requestPromise;
+}
+
+// ---- Search debounce ---------------------------------------------------
+//
+// Debounced separately from cachedFetch's de-duplication: de-dupe
+// handles two callers asking for the SAME query at the same time,
+// while this handles a single caller asking for a RAPIDLY CHANGING
+// query (a user typing). Every call while a debounce window is open
+// resets the timer and updates which query will actually be fetched;
+// all callers within that window share one Promise that resolves
+// with the trailing (most recent) query's results -- exactly what a
+// search-as-you-type box wants, and it means only one request goes
+// out per pause in typing, not one per keystroke.
+const SEARCH_DEBOUNCE_MS = 450; // within the requested 400-500ms range
+
+let searchDebounceTimer = null;
+let searchDebouncePromise = null;
+let searchDebounceResolvers = null;
+let latestSearchRequest = null;
+
+function debouncedSearchFetch(trimmedQuery, number, cacheKey) {
+  latestSearchRequest = { trimmedQuery, number, cacheKey };
+
+  if (!searchDebouncePromise) {
+    searchDebouncePromise = new Promise((resolve, reject) => {
+      searchDebounceResolvers = { resolve, reject };
+    });
+  }
+
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer);
+  }
+
+  searchDebounceTimer = setTimeout(() => {
+    const { trimmedQuery: query, number: resultCount, cacheKey: key } =
+      latestSearchRequest;
+    const resolvers = searchDebounceResolvers;
+
+    // Reset shared state before fetching so the next debounce window
+    // (the next burst of typing) starts clean.
+    searchDebounceTimer = null;
+    searchDebouncePromise = null;
+    searchDebounceResolvers = null;
+    latestSearchRequest = null;
+
+    performSearchFetch(query, resultCount, key)
+      .then(resolvers.resolve)
+      .catch(resolvers.reject);
+  }, SEARCH_DEBOUNCE_MS);
+
+  return searchDebouncePromise;
+}
+
+function performSearchFetch(trimmedQuery, number, cacheKey) {
+  return cachedFetch(cacheKey, CACHE_TYPES.SEARCH, async () => {
+    const data = await request("/complexSearch", {
+      query: trimmedQuery,
+      number,
+      addRecipeInformation: true,
+      fillIngredients: true,
+    });
+    return (data.results || []).map(normalizeRecipe);
+  });
+}
+
 // ---- Public API ------------------------------------------------------
 
 // Searches Spoonacular's recipe database by keyword (title/ingredients).
 // `addRecipeInformation` pulls back full details in the same request
 // so search results don't need a second round-trip per recipe.
+//
+// Optimizations applied: queries under 2 characters are ignored
+// entirely (no request, no cache entry); a fresh cached result for
+// the exact same query skips the debounce and network layers
+// completely; otherwise the request is debounced (~450ms) and cached
+// for 24 hours.
 export async function searchRecipes(query, { number = 20 } = {}) {
-  const data = await request("/complexSearch", {
-    query,
-    number,
-    addRecipeInformation: true,
-    fillIngredients: true,
-  });
-  return (data.results || []).map(normalizeRecipe);
+  const trimmed = query.trim();
+  if (trimmed.length < 2) {
+    return [];
+  }
+
+  const cacheKey = `search:${trimmed.toLowerCase()}:${number}`;
+
+  // Already have a fresh answer -- no need to wait out the debounce.
+  const { entry, fresh } = readThroughCache(cacheKey);
+  if (fresh) {
+    return entry.data;
+  }
+
+  return debouncedSearchFetch(trimmed, number, cacheKey);
 }
 
 // Fetches a batch of random recipes -- used for the default Home
-// page listing when there's no active search term.
+// page listing. Cached for 24 hours under a fixed key (per `number`),
+// so the homepage shows the same recommendations all day rather than
+// re-rolling on every refresh, and only calls the API again once the
+// cache expires.
 export async function getRandomRecipes({ number = 20 } = {}) {
-  const data = await request("/random", { number });
-  return (data.recipes || []).map(normalizeRecipe);
+  const cacheKey = `homepage:random:${number}`;
+  return cachedFetch(cacheKey, CACHE_TYPES.HOMEPAGE, async () => {
+    const data = await request("/random", { number });
+    return (data.recipes || []).map(normalizeRecipe);
+  });
 }
 
 // Fetches full details for one recipe by id (accepts either a raw
-// Spoonacular id or one of this app's "sp-<id>" ids).
+// Spoonacular id or one of this app's "sp-<id>" ids). Cached for 24
+// hours and shared across the whole session, so re-opening the same
+// recipe (via back/forward navigation, a second click from a
+// different list, etc.) never re-fetches it within that window.
 export async function getRecipeDetails(id) {
   const spoonacularId = toSpoonacularId(id);
-  const raw = await request(`/${spoonacularId}/information`);
-  return normalizeRecipe(raw);
+  const cacheKey = `details:${spoonacularId}`;
+  return cachedFetch(cacheKey, CACHE_TYPES.DETAILS, async () => {
+    const raw = await request(`/${spoonacularId}/information`);
+    return normalizeRecipe(raw);
+  });
 }
 
 // Alias: Spoonacular's "recipe information by id" endpoint is the
 // same /{id}/information call used for full recipe details, so this
-// is intentionally the same function under the name requested.
+// is intentionally the same function (and shares its cache) under
+// the name requested.
 export const getRecipeInformationById = getRecipeDetails;
+
+// ---- Developer utility -------------------------------------------------
+
+// Clears every layer of the cache: in-memory, localStorage (homepage,
+// search, and details entries alike -- they all share
+// CACHE_KEY_PREFIX), and any pending debounced search. Development
+// use only (e.g. from the browser console while testing against a
+// limited API quota) -- not wired into any UI.
+export function clearRecipeCache() {
+  memoryCache.clear();
+  inFlightRequests.clear();
+
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer);
+  }
+  searchDebounceTimer = null;
+  searchDebouncePromise = null;
+  searchDebounceResolvers = null;
+  latestSearchRequest = null;
+
+  try {
+    const keysToRemove = [];
+    for (let i = 0; i < window.localStorage.length; i += 1) {
+      const key = window.localStorage.key(i);
+      if (key && key.startsWith(CACHE_KEY_PREFIX)) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach((key) => window.localStorage.removeItem(key));
+  } catch {
+    // localStorage unavailable -- nothing there to clear.
+  }
+}
+
+// Dev-console convenience only -- never relied on by app code, and
+// only attached outside production builds.
+if (import.meta.env.DEV && typeof window !== "undefined") {
+  window.clearRecipeCache = clearRecipeCache;
+}
