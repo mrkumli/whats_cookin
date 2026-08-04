@@ -11,6 +11,7 @@
 //   title: string,
 //   image: string,
 //   cookTime: number,        // minutes
+//   servings: number | null,
 //   difficulty: "Easy" | "Medium" | "Hard",
 //   category: string,        // time-of-day bucket, e.g. "Breakfast", "Dinner"
 //   ingredients: [{ name: string, quantity: string }],
@@ -159,6 +160,7 @@ export function normalizeRecipe(raw) {
     title: raw.title || "Untitled recipe",
     image: raw.image || PLACEHOLDER_IMAGE,
     cookTime: typeof raw.readyInMinutes === "number" ? raw.readyInMinutes : 30,
+    servings: typeof raw.servings === "number" ? raw.servings : null,
     difficulty: estimateDifficulty(raw.readyInMinutes),
     category: mapCategory(raw.dishTypes),
     ingredients: normalizeIngredients(raw.extendedIngredients),

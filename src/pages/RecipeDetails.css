@@ -35,6 +35,8 @@
 
 .recipe-details__meta {
   display: flex;
+  flex-wrap: wrap;
+  row-gap: 0.25rem;
   gap: var(--space-xs);
   color: var(--color-text-muted);
 }

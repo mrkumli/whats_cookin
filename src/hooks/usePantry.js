@@ -1,37 +1,45 @@
 import { useEffect, useState } from "react";
-import { MOCK_PANTRY } from "../data/mockPantry";
+import { getPantryData } from "../services/pantryProvider";
 
 // usePantry
 //
-// The single place recipe-feature code asks "what's in the pantry?".
-// Right now it resolves MOCK_PANTRY after a short simulated delay
-// (so loading states have something real to show). Every consumer
-// (Home, RecipeDetails) reads pantry data through this hook instead
-// of importing mock data directly, so integration is a one-file change.
-//
-// TODO (integration): once the pantry-management branch is merged,
-// replace the body of the effect below with a real fetch, e.g.:
-//   const { currentUser } = useAuth();
-//   getPantryItems(currentUser.uid).then(setItems).catch(setError);
-// and delete the setTimeout/MOCK_PANTRY simulation entirely.
+// The React-facing wrapper every recipe-feature component uses to
+// read pantry data (Home, RecipeDetails). It doesn't know or care
+// whether that data is the temporary mock pantry or real Firestore
+// data -- that's entirely PantryProvider's concern. This hook should
+// not need to change when the pantry-management branch is merged;
+// see services/pantryProvider.js for the integration TODOs.
 export function usePantry() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     setError(null);
 
-    // TODO (integration): remove this simulated delay -- it only
-    // exists so skeleton/loading UI has something to render against
-    // while real pantry data isn't wired up yet.
-    const timer = setTimeout(() => {
-      setItems(MOCK_PANTRY);
-      setLoading(false);
-    }, 400);
+    getPantryData()
+      .then((data) => {
+        if (!cancelled) {
+          setItems(data);
+        }
+      })
+      .catch((fetchError) => {
+        if (!cancelled) {
+          setError(fetchError.message || "Couldn't load pantry data.");
+          setItems([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
 
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return { items, loading, error };

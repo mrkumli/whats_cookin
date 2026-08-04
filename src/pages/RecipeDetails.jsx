@@ -135,6 +135,20 @@ function RecipeDetails() {
         <span>{recipe.difficulty}</span>
         <span>•</span>
         <span>{recipe.category}</span>
+        {typeof recipe.servings === "number" && (
+          <>
+            <span>•</span>
+            <span>
+              {recipe.servings} {recipe.servings === 1 ? "serving" : "servings"}
+            </span>
+          </>
+        )}
+        {recipe.cuisine && recipe.cuisine !== "Other" && (
+          <>
+            <span>•</span>
+            <span>{recipe.cuisine}</span>
+          </>
+        )}
       </div>
 
       <section className="recipe-details__section">
