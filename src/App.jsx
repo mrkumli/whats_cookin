@@ -6,6 +6,7 @@ import Signup from "./pages/Signup";
 import Pantry from "./pages/Pantry";
 import RecipeDetails from "./pages/RecipeDetails";
 import NotFound from "./pages/NotFound";
+import PrivateRoute from "./components/PrivateRoute";
 import "./App.css";
 
 function App() {
@@ -15,8 +16,12 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/pantry" element={<Pantry />} />
-        <Route path="/recipes/:recipeId" element={<RecipeDetails />} />
+        <Route path="/pantry" element={
+          <PrivateRoute><Pantry /></PrivateRoute>
+        } />
+        <Route path="/recipes/:recipeId" element={
+          <PrivateRoute><RecipeDetails /></PrivateRoute>
+        } />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Layout>

@@ -82,14 +82,27 @@
 .navbar__cta {
   background-color: var(--color-primary);
   color: #fff !important;
-  padding: 0.45rem 1.1rem;
-  border-radius: var(--radius-pill);
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius);
 }
 
 .navbar__cta:hover {
   background-color: var(--color-primary-dark);
 }
+.navbar__logout {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.9rem;
+  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
 
+.navbar__logout:hover {
+  background-color: var(--color-border);
+}
 /* Mobile menu toggle button: hidden on desktop */
 .navbar__toggle {
   display: none;
@@ -166,4 +179,140 @@
     flex-direction: column;
     align-items: flex-start;
   }
+}
+/* ---- Auth pages ---- */
+.auth-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: var(--space-md);
+}
+
+.auth-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-lg);
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-card h1 {
+  margin-top: 0;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.auth-form input {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  background: var(--color-bg);
+}
+
+.auth-form button {
+  padding: 0.65rem;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.auth-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-error {
+  color: #c0392b;
+  font-size: 0.9rem;
+  margin-bottom: var(--space-sm);
+}
+/* ---- Pantry page ---- */
+.pantry-add {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.pantry-add input {
+  flex: 1;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  background: var(--color-bg);
+}
+
+.pantry-add button {
+  padding: 0.6rem 1.2rem;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.pantry-add button:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.pantry-search {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  background: var(--color-bg);
+  margin-bottom: var(--space-md);
+}
+
+.pantry-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.pantry-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.pantry-item button {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.pantry-item button:hover {
+  background-color: #fdecea;
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
+.pantry-empty {
+  color: var(--color-text-muted);
+  font-style: italic;
 }

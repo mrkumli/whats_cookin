@@ -1,15 +1,20 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
-// Navigation bar
-// Logo + links. On small screens, links collapse behind a menu
-// button. Purely visual for now -- no active-link highlighting or
-// auth-based show/hide logic yet (that comes with the auth feature).
 function Navigation() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
 
   function closeMenu() {
     setMenuOpen(false);
+  }
+
+  async function handleLogout() {
+    closeMenu();
+    await logout();
+    navigate("/login");
   }
 
   return (
@@ -39,18 +44,20 @@ function Navigation() {
             menuOpen ? "navbar__links navbar__links--open" : "navbar__links"
           }
         >
-          <Link to="/" onClick={closeMenu}>
-            Home
-          </Link>
-          <Link to="/pantry" onClick={closeMenu}>
-            Pantry
-          </Link>
-          <Link to="/login" onClick={closeMenu}>
-            Login
-          </Link>
-          <Link to="/signup" className="navbar__cta" onClick={closeMenu}>
-            Sign Up
-          </Link>
+          <Link to="/" onClick={closeMenu}>Home</Link>
+          {currentUser ? (
+            <>
+              <Link to="/pantry" onClick={closeMenu}>Pantry</Link>
+              <button className="navbar__logout" onClick={handleLogout}>
+                Log out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" onClick={closeMenu}>Login</Link>
+              <Link to="/signup" className="navbar__cta" onClick={closeMenu}>Sign Up</Link>
+            </>
+          )}
         </nav>
       </div>
     </header>
