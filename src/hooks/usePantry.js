@@ -1,46 +1,43 @@
 import { useEffect, useState } from "react";
-import { getPantryData } from "../services/pantryProvider";
+import { useAuth } from "../contexts/AuthContext";
+import { subscribePantryData } from "../services/pantryProvider";
 
 // usePantry
 //
 // The React-facing wrapper every recipe-feature component uses to
-// read pantry data (Home, RecipeDetails). It doesn't know or care
-// whether that data is the temporary mock pantry or real Firestore
-// data -- that's entirely PantryProvider's concern. This hook should
-// not need to change when the pantry-management branch is merged;
-// see services/pantryProvider.js for the integration TODOs.
+// read pantry data (Home, RecipeDetails). Backed by a LIVE Firestore
+// subscription for the signed-in user (via PantryProvider ->
+// pantryService.subscribeToPantry), not a one-time fetch -- so
+// pantry edits made on the Pantry page (add/remove ingredients)
+// update `items` here automatically, with no page reload and no
+// manual refetch. Re-subscribes whenever the signed-in user changes
+// (login/logout), and reports an empty pantry while logged out.
 export function usePantry() {
+  const { currentUser } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    let cancelled = false;
     setLoading(true);
     setError(null);
 
-    getPantryData()
-      .then((data) => {
-        if (!cancelled) {
-          setItems(data);
-        }
-      })
-      .catch((fetchError) => {
-        if (!cancelled) {
-          setError(fetchError.message || "Couldn't load pantry data.");
-          setItems([]);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setLoading(false);
-        }
+    let unsubscribe = () => {};
+    try {
+      unsubscribe = subscribePantryData(currentUser?.uid, (data) => {
+        setItems(data);
+        setLoading(false);
       });
+    } catch (subscribeError) {
+      setError(subscribeError.message || "Couldn't load pantry data.");
+      setItems([]);
+      setLoading(false);
+    }
 
     return () => {
-      cancelled = true;
+      unsubscribe();
     };
-  }, []);
+  }, [currentUser]);
 
   return { items, loading, error };
 }

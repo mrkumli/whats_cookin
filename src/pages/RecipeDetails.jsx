@@ -23,6 +23,12 @@ function buildDisplayedIngredients(recipe) {
 
 function RecipeDetails() {
   const { recipeId } = useParams();
+  // Recipe <-> pantry integration point: pantryItems is the signed-in
+  // user's real, live Firestore pantry. It drives both the green/red
+  // availability icons below (isIngredientInPantry) and which
+  // substitutes get offered (getAvailableSubstitutes) -- an ingredient
+  // only shows as available, and a substitute only gets suggested, if
+  // it's actually in this user's pantry right now.
   const { items: pantryItems, loading: pantryLoading } = usePantry();
 
   const [recipe, setRecipe] = useState(null);

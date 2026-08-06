@@ -2,12 +2,19 @@ import { normalizeText } from "./text";
 
 // Recipe <-> pantry matching utils
 //
-// Pure functions: plain data in, plain data out. No mock data, no
-// UI, no Firebase -- callers (pages, hooks) are responsible for
-// supplying real pantry data, currently sourced via hooks/usePantry.
+// This is the core of the recipe <-> pantry integration: every
+// comparison between "what a recipe needs" and "what the user has"
+// happens here. Pure functions: plain data in, plain data out. No
+// mock data, no UI, no Firebase -- callers (pages, hooks) are
+// responsible for supplying pantry data, which now comes from the
+// authenticated user's real Firestore pantry via hooks/usePantry
+// (see services/pantryProvider.js for how that's wired up).
 //
-// `pantryItems` looks like: [{ name: string, quantity: string }]
-// (same shape as a recipe's `ingredients`, minus anything recipe-specific).
+// `pantryItems` looks like: [{ name: string, ... }] -- real Firestore
+// pantry documents are { id, name, createdAt }, with no `quantity`
+// field, but that's fine: everything below only ever reads `.name`,
+// so no shape translation was needed when the mock pantry was
+// replaced with real data.
 
 // True if the pantry contains an ingredient with this name.
 // Only checks presence, not quantity -- quantity-aware matching can

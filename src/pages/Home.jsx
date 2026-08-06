@@ -32,6 +32,12 @@ function Home() {
   const [appliedTimes, setAppliedTimes] = useState([]);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
+  // Recipe <-> pantry integration point: pantryItems here is the
+  // signed-in user's real, live Firestore pantry (empty while logged
+  // out). Everything below that calls isRecipeCookable/
+  // countMissingIngredients against it re-runs automatically whenever
+  // the pantry changes, since usePantry's `items` come from a live
+  // subscription, not a one-time fetch.
   const { items: pantryItems, loading: pantryLoading } = usePantry();
 
   // "Recommended Recipes" -- search-aware (calls RecipeService's
