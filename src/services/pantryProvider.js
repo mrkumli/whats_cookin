@@ -1,5 +1,4 @@
 import { MOCK_PANTRY } from "../data/mockPantry";
-
 // PantryProvider
 //
 // The single abstraction the recipe feature goes through to ask
