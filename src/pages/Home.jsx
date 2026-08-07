@@ -148,16 +148,16 @@ function Home() {
 
   function recommendedEmptyMessage() {
     if (hasActiveFilters) {
-      return "Nothing you can make matches the selected filters yet.";
+      return "Oops! Nothing you can make matches the selected filters yet. Let's broaden our taste horizons <3";
     }
-    return "Nothing fully cookable yet with what's on hand.";
+    return "Oops! Nothing fully cookable yet with your pantry. Time to go grocery shopping perhaps.";
   }
 
   function searchEmptyMessage() {
     if (hasActiveFilters) {
-      return `No recipes match "${searchTerm}" with the selected filters.`;
+      return `Oops! No recipes match "${searchTerm}" with the selected filters.`;
     }
-    return `No recipes match "${searchTerm}". Try a different recipe name or ingredient.`;
+    return `Oop! No recipes match "${searchTerm}". Try a different recipe name or ingredient.`;
   }
 
   return (
@@ -196,7 +196,7 @@ function Home() {
       {isPantryEmpty && (
         <EmptyState
           title="Your pantry is empty"
-          message="Add a few ingredients to your pantry to see which recipes you can make."
+          message="Add a few ingredients to your pantry to see which recipes you can make, chief."
           action={<Link to="/pantry">Go to Pantry →</Link>}
         />
       )}
@@ -305,7 +305,7 @@ function Home() {
           </section>
 
           <section className="home-section">
-            <h2>Use Soon</h2>
+            <h2>Use ingredients expiring Soon</h2>
             {expiringIngredientNames.length === 0 ? (
               <p className="home-section__empty">
                 Nothing expiring soon -- your pantry looks fresh.
@@ -333,7 +333,7 @@ function Home() {
             ) : useSoonRecipes.length === 0 ? (
               <EmptyState
                 title="No recipes found"
-                message="We couldn't find recipes using your soon-to-expire ingredients."
+                message="We couldn't find recipes using your soon-to-expire ingredients. Let's chuck those cookbooks this time."
               />
             ) : (
               <div className="recipe-grid">
@@ -349,7 +349,7 @@ function Home() {
           </section>
 
           <section className="home-section">
-            <h2>Random Recipes</h2>
+            <h2>Today's Recommended Recipes</h2>
             {randomLoading || pantryLoading ? (
               <div className="recipe-grid">
                 {Array.from({ length: SKELETON_COUNT }).map((_, index) => (

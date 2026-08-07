@@ -6,7 +6,7 @@ function Footer() {
       <div className="footer__inner">
         <span>🍲 What's Cookin'</span>
         <span className="footer__muted">
-          CS160 project &middot; cook with what you have
+          CS160A project &middot; cook with what you have
         </span>
       </div>
     </footer>

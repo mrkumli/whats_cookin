@@ -3,7 +3,7 @@ function NotFound() {
   return (
     <div className="page">
       <h1>404</h1>
-      <p>This page does not exist.</p>
+      <p>Oop! This page does not exist. Probably left for marinating.</p>
     </div>
   );
 }

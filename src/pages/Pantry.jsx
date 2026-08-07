@@ -180,7 +180,7 @@ export default function Pantry() {
         <p>Loading...</p>
       ) : filtered.length === 0 ? (
         <p className="pantry-empty">
-          {search ? "No matching items." : "Your pantry is empty — add something!"}
+          {search ? "No matching items." : "Your pantry is empty, chief. Let's add something!"}
         </p>
       ) : (
         <div className="pantry-grid">

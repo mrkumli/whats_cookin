@@ -236,7 +236,7 @@ function RecipeDetails() {
           onClose={closeSubstituteModal}
         >
           {activeSubstitutes.length === 0 ? (
-            <p>No pantry substitutes are available for this ingredient.</p>
+            <p>No pantry substitutes are available for this ingredient. Let's go grocery shopping, chief.</p>
           ) : (
             <>
               <p>Choose a substitute already in your pantry:</p>

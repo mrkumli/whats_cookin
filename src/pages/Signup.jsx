@@ -13,14 +13,14 @@ export default function Signup() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (password !== confirm) return setError("Passwords do not match.");
+    if (password !== confirm) return setError("Whoops! Taste test failed, Passwords do not match.");
     setError("");
     setLoading(true);
     try {
       await signup(email, password);
       navigate("/");
     } catch {
-      setError("Failed to create an account.");
+      setError("Half-baked attempt! Failed to create an account.\n\nPassword requirements:\n• At least 6 characters long\n• Must contain a valid email address\n• Avoid using common passwords.");
     }
     setLoading(false);
   }
@@ -29,7 +29,7 @@ export default function Signup() {
     <div className="auth-page">
       <div className="auth-card">
         <h1>Sign up</h1>
-        {error && <p className="auth-error">{error}</p>}
+        {error && <p style={{ whiteSpace: "pre-line" }} className="auth-error">{error}</p>}
         <div className="auth-form">
           <input
             type="email"
