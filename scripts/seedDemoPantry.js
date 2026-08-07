@@ -57,7 +57,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // ------------------------------------------------------------------
 // EDIT ME: the demo account's Firebase Auth UID.
 // ------------------------------------------------------------------
-const DEMO_USER_UID = "REPLACE_WITH_DEMO_USER_UID";
+const DEMO_USER_UID = "vboHHIdYvyc0ujNkDt4oVeOfDZn2";
 
 function initializeAdminApp() {
   const serviceAccountPath = join(__dirname, "serviceAccountKey.json");
