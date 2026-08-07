@@ -33,6 +33,17 @@ export function useUseSoonRecipes(pantryItems) {
   const [error, setError] = useState(null);
   const [retryToken, setRetryToken] = useState(0);
 
+  // TEMP DEBUG -- remove once verified against the live demo account.
+  // Confirms pantry data is actually reaching this hook, and how many
+  // items were classified "expiring" -- exactly what gets sent to
+  // RecipeService.
+  console.log(
+    "[UseSoon debug] pantryItems:",
+    pantryItems.length,
+    "expiring:",
+    expiringKey || "(none)"
+  );
+
   useEffect(() => {
     if (!expiringKey) {
       // Nothing expiring -- nothing to fetch, and nothing to show.
@@ -48,11 +59,15 @@ export function useUseSoonRecipes(pantryItems) {
 
     getRecipesByIngredients(expiringKey.split(","))
       .then((results) => {
+        // TEMP DEBUG -- remove once verified.
+        console.log("[UseSoon debug] recipes returned:", results.length);
         if (!cancelled) {
           setRecipes(results);
         }
       })
       .catch((fetchError) => {
+        // TEMP DEBUG -- remove once verified.
+        console.log("[UseSoon debug] fetch failed:", fetchError.message);
         if (!cancelled) {
           setError(fetchError.message || "Couldn't load Use Soon recipes.");
           setRecipes([]);

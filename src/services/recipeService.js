@@ -403,16 +403,35 @@ export async function getRandomRecipes({ number = 20 } = {}) {
 // Fetches recipes that use ANY of the given ingredient names -- built
 // for the "Use Soon" homepage section, which passes in the pantry
 // ingredients that are close to expiring (see hooks/useUseSoonRecipes
-// and utils/expiryStatus for how that list is derived). Reuses the
-// same complexSearch endpoint and addRecipeInformation=true as
-// searchRecipes, just with `includeIngredients` instead of `query`,
-// so results get the exact same normalization and caching treatment.
+// and utils/expiryStatus for how that list is derived).
 //
-// Cache key is normalized (lowercased, de-duplicated, sorted) so
-// requesting the same ingredient set in a different order or casing
-// -- e.g. "Milk,Eggs" vs "eggs, milk" -- always hits the same 24h
-// cache entry instead of creating a second one.
-export async function getRecipesByIngredients(ingredientNames, { number = 10 } = {}) {
+// BUG FIX: this used to join every ingredient into a single
+// `includeIngredients` value on one complexSearch call. Spoonacular's
+// includeIngredients is an AND filter -- a recipe must contain EVERY
+// listed ingredient to match -- so asking for one recipe that uses
+// chicken thigh AND salmon AND spinach AND milk (etc.) all at once
+// almost always returned zero results. That's why "Use Soon" was
+// empty. Fixed by querying per ingredient (each call is a true "does
+// this recipe use THIS ingredient" match) and merging the results
+// client-side, which is what "any of these" actually requires.
+//
+// Each per-ingredient query reuses the same complexSearch endpoint
+// and addRecipeInformation=true as searchRecipes (same normalization)
+// and is cached independently under its own 24h entry, so repeat
+// ingredients across visits -- or overlapping expiring-ingredient
+// sets over time -- increasingly resolve from cache instead of the
+// network. Total request cost for one "Use Soon" load is bounded by
+// the number of DISTINCT expiring ingredients, not by how many
+// recipes are requested.
+//
+// Results are also ranked by how many of the given ingredients each
+// recipe matched -- a recipe using more of the soon-to-expire
+// ingredients is a better "use it up" suggestion, so it's sorted
+// first. This uses only data already fetched, no extra requests.
+export async function getRecipesByIngredients(
+  ingredientNames,
+  { perIngredient = 5 } = {}
+) {
   const normalized = [
     ...new Set(
       ingredientNames.map((name) => name.trim().toLowerCase()).filter(Boolean)
@@ -423,10 +442,33 @@ export async function getRecipesByIngredients(ingredientNames, { number = 10 } =
     return [];
   }
 
-  const cacheKey = `use-soon:${normalized.join(",")}:${number}`;
+  const resultsPerIngredient = await Promise.all(
+    normalized.map((ingredient) =>
+      fetchRecipesForSingleIngredient(ingredient, perIngredient)
+    )
+  );
+
+  // Merge + de-duplicate by id, counting how many of the requested
+  // ingredients each recipe showed up for.
+  const matchCounts = new Map(); // id -> count
+  const recipesById = new Map(); // id -> recipe
+  for (const recipeList of resultsPerIngredient) {
+    for (const recipe of recipeList) {
+      recipesById.set(recipe.id, recipe);
+      matchCounts.set(recipe.id, (matchCounts.get(recipe.id) || 0) + 1);
+    }
+  }
+
+  return [...recipesById.values()].sort(
+    (a, b) => matchCounts.get(b.id) - matchCounts.get(a.id)
+  );
+}
+
+function fetchRecipesForSingleIngredient(ingredient, number) {
+  const cacheKey = `use-soon:${ingredient}:${number}`;
   return cachedFetch(cacheKey, CACHE_TYPES.USE_SOON, async () => {
     const data = await request("/complexSearch", {
-      includeIngredients: normalized.join(","),
+      includeIngredients: ingredient,
       number,
       addRecipeInformation: true,
       fillIngredients: true,
