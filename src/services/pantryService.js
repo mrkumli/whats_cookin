@@ -32,10 +32,14 @@ export async function getPantryItems(userId) {
   throw new Error("getPantryItems() not implemented yet");
 }
 
-// Add an item
-export async function addPantryItem(userId, name) {
+// Add an item. `item` is { name, quantity, unit, expiryDate } --
+// expiryDate is optional (pass null if the user didn't set one).
+export async function addPantryItem(userId, item) {
   return addDoc(pantryRef(userId), {
-    name: name.trim(),
+    name: item.name.trim(),
+    quantity: item.quantity,
+    unit: item.unit || "",
+    expiryDate: item.expiryDate || null,
     createdAt: Date.now(),
   });
 }

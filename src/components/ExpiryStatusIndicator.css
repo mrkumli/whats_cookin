@@ -1,0 +1,19 @@
+.expiry-dot {
+  display: inline-block;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.expiry-dot--fresh {
+  background-color: var(--color-primary);
+}
+
+.expiry-dot--expiring {
+  background-color: #d98c2b;
+}
+
+.expiry-dot--expired {
+  background-color: var(--color-accent);
+}
