@@ -180,6 +180,7 @@ const CACHE_TYPES = {
   HOMEPAGE: "homepage", // random/recommended recipes shown on Home
   SEARCH: "search", // complexSearch results
   DETAILS: "details", // single recipe /information lookups
+  USE_SOON: "use_soon", // recipes matched to soon-to-expire pantry ingredients
 };
 
 // In-memory (session) cache -- Map<cacheKey, { data, timestamp, type }>
@@ -395,6 +396,42 @@ export async function getRandomRecipes({ number = 20 } = {}) {
   return cachedFetch(cacheKey, CACHE_TYPES.HOMEPAGE, async () => {
     const data = await request("/random", { number });
     return (data.recipes || []).map(normalizeRecipe);
+  });
+}
+
+// ---- Recipe <-> pantry integration point --------------------------
+// Fetches recipes that use ANY of the given ingredient names -- built
+// for the "Use Soon" homepage section, which passes in the pantry
+// ingredients that are close to expiring (see hooks/useUseSoonRecipes
+// and utils/expiryStatus for how that list is derived). Reuses the
+// same complexSearch endpoint and addRecipeInformation=true as
+// searchRecipes, just with `includeIngredients` instead of `query`,
+// so results get the exact same normalization and caching treatment.
+//
+// Cache key is normalized (lowercased, de-duplicated, sorted) so
+// requesting the same ingredient set in a different order or casing
+// -- e.g. "Milk,Eggs" vs "eggs, milk" -- always hits the same 24h
+// cache entry instead of creating a second one.
+export async function getRecipesByIngredients(ingredientNames, { number = 10 } = {}) {
+  const normalized = [
+    ...new Set(
+      ingredientNames.map((name) => name.trim().toLowerCase()).filter(Boolean)
+    ),
+  ].sort();
+
+  if (normalized.length === 0) {
+    return [];
+  }
+
+  const cacheKey = `use-soon:${normalized.join(",")}:${number}`;
+  return cachedFetch(cacheKey, CACHE_TYPES.USE_SOON, async () => {
+    const data = await request("/complexSearch", {
+      includeIngredients: normalized.join(","),
+      number,
+      addRecipeInformation: true,
+      fillIngredients: true,
+    });
+    return (data.results || []).map(normalizeRecipe);
   });
 }
 
