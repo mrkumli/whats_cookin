@@ -49,7 +49,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import admin from "firebase-admin";
+import { initializeApp, cert, applicationDefault } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
 import { buildDemoPantryItems, slugifyIngredientName } from "./demoPantryData.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -59,25 +60,42 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // ------------------------------------------------------------------
 const DEMO_USER_UID = "vboHHIdYvyc0ujNkDt4oVeOfDZn2";
 
+// function initializeAdminApp() {
+//   const serviceAccountPath = join(__dirname, "serviceAccountKey.json");
+
+//   if (existsSync(serviceAccountPath)) {
+//     const serviceAccount = JSON.parse(readFileSync(serviceAccountPath, "utf8"));
+//     return admin.initializeApp({
+//       credential: admin.credential.cert(serviceAccount),
+//     });
+//   }
+
+//   // Falls back to GOOGLE_APPLICATION_CREDENTIALS, or another ambient
+//   // credential source such as `gcloud auth application-default login`.
+//   return admin.initializeApp({
+//     credential: admin.credential.applicationDefault(),
+//   });
+// }
 function initializeAdminApp() {
   const serviceAccountPath = join(__dirname, "serviceAccountKey.json");
 
   if (existsSync(serviceAccountPath)) {
-    const serviceAccount = JSON.parse(readFileSync(serviceAccountPath, "utf8"));
-    return admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
+    const serviceAccount = JSON.parse(
+      readFileSync(serviceAccountPath, "utf8")
+    );
+
+    return initializeApp({
+      credential: cert(serviceAccount),
     });
   }
 
-  // Falls back to GOOGLE_APPLICATION_CREDENTIALS, or another ambient
-  // credential source such as `gcloud auth application-default login`.
-  return admin.initializeApp({
-    credential: admin.credential.applicationDefault(),
+  return initializeApp({
+    credential: applicationDefault(),
   });
 }
 
 async function seedDemoPantry() {
-  if (!DEMO_USER_UID || DEMO_USER_UID === "REPLACE_WITH_DEMO_USER_UID") {
+  if (!DEMO_USER_UID) {
     console.error(
       "Set DEMO_USER_UID at the top of scripts/seedDemoPantry.js before running this."
     );
@@ -86,7 +104,7 @@ async function seedDemoPantry() {
   }
 
   initializeAdminApp();
-  const db = admin.firestore();
+  const db = getFirestore();
 
   // Existing Firestore structure, matching src/services/pantryService.js:
   // users/{uid}/pantryItems/{itemId}
