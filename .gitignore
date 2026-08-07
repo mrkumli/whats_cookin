@@ -13,6 +13,10 @@ dist-ssr
 *.local
 .env
 
+# Firebase Admin SDK credentials for dev-only scripts (scripts/*.js) --
+# never commit a service account key.
+scripts/serviceAccountKey.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
