@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>What's Cookin'? - Design Case Study</title>
+<meta name="description" content="A case study of What's Cookin', a pantry-aware recipe recommendation app: needfinding, prototyping, implementation, and user evaluation." />
+<link rel="icon" href="assets/logo.png" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a class="brand" href="#hero"><img src="assets/logo.png" alt="What's Cookin' logo" />What's Cookin'?</a>
+    <ul class="navlinks">
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#needfinding">Needfinding</a></li>
+      <li><a href="#lofi">Lo-fi</a></li>
+      <li><a href="#hifi">Hi-fi</a></li>
+      <li><a href="#implementation">Build</a></li>
+      <li><a href="#evaluation">Evaluation</a></li>
+      <li><a href="#reflection">Reflection</a></li>
+      <li><a class="navcta" href="https://whats-cookin-cs160a.vercel.app" target="_blank" rel="noopener">Try the App</a></li>
+    </ul>
+    <button class="navtoggle" id="navtoggle" aria-label="Toggle menu">&#9776;</button>
+  </div>
+</nav>
+
+<div class="timeline-rail">
+  <div class="wrap">
+    <a href="#problem">01 Problem</a>
+    <a href="#needfinding">02 Needfinding</a>
+    <a href="#lofi">03 Lo-fi</a>
+    <a href="#iterations">04 Iterations</a>
+    <a href="#hifi">05 Hi-fi</a>
+    <a href="#implementation">06 Implementation</a>
+    <a href="#evaluation">07 Evaluation</a>
+    <a href="#final">08 Final Product</a>
+    <a href="#reflection">09 Reflection</a>
+  </div>
+</div>
+
+<header class="hero" id="hero">
+  <div class="wrap">
+    <img class="hero-logo" src="assets/logo.png" alt="What's Cookin' logo" />
+    <h1>What's Cookin'?</h1>
+    <p class="slogan">Eat good. Eat bold. Cook smarter with what you have.</p>
+    <p class="desc">A pantry-aware recipe app that turns forgotten, about-to-expire ingredients into a concrete, cookable suggestion - so nothing gets wasted and nobody has to stare at a full fridge wondering what to make.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#problem">Explore the Process</a>
+      <a class="btn btn-outline" href="https://whats-cookin-cs160a.vercel.app" target="_blank" rel="noopener">Try What's Cookin'</a>
+    </div>
+    <div class="hero-shot">
+      <img src="assets/final-homepage.png" alt="What's Cookin' home page showing recommended recipes and use-soon suggestions" />
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section class="stage" id="problem">
+    <div class="wrap">
+      <span class="stage-num">01 · THE PROBLEM</span>
+      <h2>Food that's bought gets forgotten - and a full pantry can still feel like nothing to cook</h2>
+      <p class="lede">Ingredients pushed to the back of a fridge or drawer spoil unnoticed. Even when nothing has gone bad yet, a fridge full of unrelated items produces a kind of choice paralysis that pushes people toward takeout instead of cooking what they already own.</p>
+      <div class="grid-3">
+        <div class="card">
+          <h3>Who we designed for</h3>
+          <p>Budget-conscious students, international students adapting to a new grocery ecosystem, and people who regularly cook for a household.</p>
+        </div>
+        <div class="card">
+          <h3>Why it's frustrating</h3>
+          <p>Existing recipe apps match recipes to taste, not to what's already sitting in your kitchen and about to expire.</p>
+        </div>
+        <div class="card">
+          <h3>Our bet</h3>
+          <p>If the app already knows what's in your pantry and how soon it spoils, it should turn that inventory into a cookable suggestion - not you.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stage" id="needfinding">
+    <div class="wrap">
+      <span class="stage-num">02 · NEEDFINDING</span>
+      <h2>Six interviews, three recurring pain points</h2>
+      <p class="lede">We interviewed budget shoppers, international students, and household cooks. Independent of who we talked to, three problems came up repeatedly.</p>
+      <div class="pill-row">
+        <span class="pill">Out of sight, out of mind</span>
+        <span class="pill">Choice paralysis</span>
+        <span class="pill">Sub-optimal resource use</span>
+      </div>
+      <div class="grid-2">
+        <div>
+          <blockquote class="finding">Ingredients pushed to the back of a fridge or drawer spoil unnoticed - nobody wanted to waste food, they just lost track of what they had.</blockquote>
+          <blockquote class="finding">Faced with a fridge full of unrelated items, people described defaulting to takeout rather than figuring out what those items could become.</blockquote>
+        </div>
+        <div class="shot">
+          <img src="assets/sketch-needfinding.png" alt="Early ideation sketches from needfinding, including virtual pantry zones and profile screens" />
+          <div class="shot-cap">Milestone 2 - early concept sketches synthesized from needfinding interviews.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stage" id="lofi">
+    <div class="wrap">
+      <span class="stage-num">03 · LO-FI PROTOTYPING</span>
+      <h2>Three flows, tested in a critique session</h2>
+      <p class="lede">We translated the "Use-It-or-Lose-It" direction into three distinct mobile flows and compared them for navigation, screen density, and clarity.</p>
+      <div class="grid-3">
+        <div class="shot">
+          <img src="assets/flow1-side-scroll.png" alt="Flow 1: Side Scrollable Cards" />
+          <div class="shot-cap">Flow 1 - Side Scrollable Cards</div>
+        </div>
+        <div class="shot">
+          <img src="assets/flow2-circle-scroll.png" alt="Flow 2: Circle Scroll" />
+          <div class="shot-cap">Flow 2 - Circle Scroll</div>
+        </div>
+        <div class="shot">
+          <img src="assets/flow3-down-scroll.png" alt="Flow 3: Down Scroll Cards" />
+          <div class="shot-cap">Flow 3 - Down Scroll Cards (selected)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stage" id="iterations">
+    <div class="wrap">
+      <span class="stage-num">04 · DESIGN ITERATIONS</span>
+      <h2>Why Flow 3 won</h2>
+      <p class="lede">Flows 1 and 2 had an immediately understandable "pantry-first" concept, but large cards left few recipes visible and navigation was hard to discover. Flow 3 kept the clarity while fixing both: a list format that shows far more recipes per screen, with pantry-match percentage and missing ingredients surfaced directly on each card.</p>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Kept from earlier flows</h3>
+          <p>Large, appealing food imagery and an immediately legible "cook with what you have" concept.</p>
+        </div>
+        <div class="card">
+          <h3>Fixed in Flow 3</h3>
+          <p>Explicit search + category filters, and a scannable list instead of space-hungry cards.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stage" id="hifi">
+    <div class="wrap">
+      <span class="stage-num">05 · HI-FI PROTOTYPE</span>
+      <h2>From flow to finished visual identity</h2>
+      <p class="lede">The high-fidelity prototype developed Flow 3 into a full interactive app in Figma with a deep forest-green palette, color-coded expiration badges, and a recipe detail screen with ingredient availability icons and an inline substitute control using the three Realizations all combined together.</p>
+      <!-- <div class="placeholder-box">
+        [Placeholder - no separate final-Figma recipe-detail screenshot available. See the implemented pantry and recipe screens below for the shipped equivalent.]
+      </div>-->
+    </div>
+  </section>
+
+  <section class="stage" id="implementation">
+    <div class="wrap">
+      <span class="stage-num">06 · IMPLEMENTATION</span>
+      <h2>A working React + Firebase + Spoonacular app</h2>
+      <p class="lede">Built as a React (Vite) single-page app deployed on Vercel, with Firebase Authentication and Firestore for the live pantry, and the Spoonacular API for recipe content.</p>
+      <div class="grid-2">
+        <div class="shot">
+          <img src="assets/final-pantry.png" alt="Implemented pantry screen with color-coded expiry status" />
+          <div class="shot-cap">Pantry - color-coded Fresh / Expiring Soon / Expired status</div>
+        </div>
+        <div class="shot">
+          <img src="assets/final-filter-modal.png" alt="Recipe filter modal with cuisine and time-of-day options" />
+          <div class="shot-cap">Recipe filters - cuisine and time-of-day</div>
+        </div>
+        <div class="shot">
+          <img src="assets/final-signup.png" alt="Sign up screen" />
+          <div class="shot-cap">Firebase Authentication - sign up</div>
+        </div>
+        <div class="shot">
+          <img src="assets/architecture.png" alt="System architecture diagram" />
+          <div class="shot-cap">System architecture: React/Vite, Firebase, Spoonacular API</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stage" id="evaluation">
+    <div class="wrap">
+      <span class="stage-num">07 · USER EVALUATION</span>
+      <h2>Five participants, four real-world tasks</h2>
+      <p class="lede">We ran a moderated think-aloud study across signup, pantry logging, recipe discovery, and inventory-check scenarios, combining timed task metrics with a ten-item Likert survey.</p>
+      <div class="stat-row">
+        <div class="stat"><div class="num">100%</div><div class="label">Success - signup, logging, inventory check</div></div>
+        <div class="stat"><div class="num accent">40%</div><div class="label">Success - find a recipe with what's on hand</div></div>
+        <div class="stat"><div class="num">3</div><div class="label">Usability themes coded from think-aloud</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="shot">
+          <img src="assets/m5-success-rate.png" alt="Task success rate by scenario and errors vs pauses scatter plot" />
+          <div class="shot-cap">Task success rate by scenario (n=5)</div>
+        </div>
+        <div class="shot">
+          <img src="assets/m5-likert.png" alt="Ten-item Likert usability survey results" />
+          <div class="shot-cap">Ten-item Likert usability survey (n=5)</div>
+        </div>
+      </div>
+      <blockquote class="finding">"I have to reset the filters since I'm not finding anything." - Participant 4</blockquote>
+      <blockquote class="finding">"Oh I can't see the possible substitutions if I don't have it already?" - Participant 2</blockquote>
+    </div>
+  </section>
+
+  <section class="stage" id="final">
+    <div class="wrap">
+      <span class="stage-num">08 · FINAL PRODUCT</span>
+      <h2>What's Cookin', shipped</h2>
+      <p class="lede">A live, deployed pantry and recipe app - sign up, log groceries with expiry dates, and get recipe suggestions that prioritize what's about to spoil.</p>
+      <div class="grid-2">
+        <div class="shot">
+          <img src="assets/final-homepage.png" alt="Final home page" />
+          <div class="shot-cap">Home - Recommended Recipes and Use Soon</div>
+        </div>
+        <div class="shot">
+          <img src="assets/final-login.png" alt="Final login screen" />
+          <div class="shot-cap">Login</div>
+        </div>
+      </div>
+      <div class="hero-actions" style="margin-top: var(--space-lg);">
+        <a class="btn btn-primary" href="https://whats-cookin-cs160a.vercel.app" target="_blank" rel="noopener">Try What's Cookin' →</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="stage" id="reflection">
+    <div class="wrap">
+      <span class="stage-num">09 · REFLECTION</span>
+      <h2>What we learned, and what's next</h2>
+      <p class="lede">The core pantry-logging loop worked well. Recipe discovery is the clearest weak point - when the obvious path (search, filter, or substitute) doesn't return what a user needs, the app offers no graceful fallback.</p>
+      <div class="grid-3">
+        <div class="card"><h3>Expiration entry</h3><p>Add an icon, label, and quick-select date presets - the field currently has no visual affordance.</p></div>
+        <div class="card"><h3>Broader filters</h3><p>Add missing-ingredient count, ingredient exclusion, and difficulty filters beyond cuisine and time-of-day.</p></div>
+        <div class="card"><h3>Independent substitutes</h3><p>Let users browse what generally substitutes for an ingredient, not only what they already own.</p></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>What's Cookin'? - CS160A, University of California, Berkeley</p>
+    <div class="flinks">
+      <a href="https://github.com/mrkumli/whats_cookin" target="_blank" rel="noopener">GitHub Repository</a>
+      <a href="https://whats-cookin-cs160a.vercel.app" target="_blank" rel="noopener">Live Application</a>
+    </div>
+    <small>Team High Fives - Kumail, Alexa, Anushah, Zarrar</small>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
